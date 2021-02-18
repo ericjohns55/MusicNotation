@@ -1,8 +1,8 @@
 # MusicNotation
 
 Summary: 
+
     I will be creating a music notation program where people can write simple melodies for playback on piano. The project will have numerous features such as score playback, rhythms, chords, and dynamics. It will have a built in sound of piano for playback, and will preview note sounds as you input them into the score. The user will be able to pick the tempo, key signature, and time signature they want to write their piece in. The application will have an option to playback the score that the user has written.
-    
     In creating this project, I will be learning python. I will be following online tutorials to get a feel for the language and its syntax, then use this knowledge to create the application and a graphical interface. The project’s interface will have the score visible on the top of the screen, then have buttons on the bottom to add notes and musical markings to the score. The user will be able to combine multiple features to create a small piece of music.
     
 Features
