@@ -7,6 +7,7 @@ from pydub import AudioSegment
 from pydub.playback import play
 from PIL import Image, ImageTk
 import tkinter
+import keyboard
 import os
 
 
@@ -26,27 +27,42 @@ def play_sound():
     d_note = AudioSegment.from_mp3(os.getcwd() + "\\sound\\D5.mp3")
     ghigh_note = AudioSegment.from_mp3(os.getcwd() + "\\sound\\G5.mp3")
 
-    mixed_audio1 = c_note.overlay(e_note).overlay(g_note).overlay(as_note)
-    play(mixed_audio1)
+    mixed_audio1 = c_note.overlay(e_note).overlay(g_note).overlay(as_note)[0.1:1000]
+    mixed_audio2 = g_note.overlay(b_note).overlay(d_note).overlay(ghigh_note)[0.1:1000]
 
-    mixed_audio2 = g_note.overlay(b_note).overlay(d_note).overlay(ghigh_note)
+    play(mixed_audio1)
     play(mixed_audio2)
+
+
+def key_press_event(event):
+    char_list = list(event.name.lower())
+    char = ord(char_list[0])
+
+    if len(char_list) == 1 and 97 <= char <= 103:
+        print(chr(char) + " " + str(char))
+        note = AudioSegment.from_mp3(os.getcwd() + "\\sound\\" + chr(char).upper() + "4.mp3")[:200]
+        play(note)
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+    background_color = "gray"
+    foreground_color = "white"
+
     app = tkinter.Tk()
     app.title("Music Notation")
     app.geometry("1280x720")
-    app.configure(bg='white')
+    app.configure(bg=background_color)
     app.resizable(False, False)
+
+    keyboard.on_press(key_press_event)
 
     # Title Frame ------------------------------------------------------------------------------------------------------
 
     frame_title = tkinter.Frame(app)
-    frame_title.configure(bg='white')
+    frame_title.configure(bg=background_color)
 
-    title = tkinter.Label(frame_title, bg="white", text="Music Notation")
+    title = tkinter.Label(frame_title, bg=background_color, text="Music Notation", fg=foreground_color)
     title.config(font=("Arial", 24, 'bold'))
     title.grid(row=0, column=0, pady=(25, 0))
 
@@ -55,29 +71,29 @@ if __name__ == '__main__':
     image = Image.open(os.getcwd() + "\\images\\icon.png")
     photo = ImageTk.PhotoImage(image.resize((96, 96)))
 
-    icon = tkinter.Label(image=photo, bg="white")
+    icon = tkinter.Label(image=photo, bg=background_color)
     icon.image = photo
 
     # Configuration Label ----------------------------------------------------------------------------------------------
 
     frame_config = tkinter.Frame(app)
-    frame_config.configure(bg='white')
-    lbl_config = tkinter.Label(frame_config, bg="white", text="Choose Score Configuration Below")
+    frame_config.configure(bg=background_color)
+    lbl_config = tkinter.Label(frame_config, bg=background_color, text="Choose Score Configuration Below", fg=foreground_color)
     lbl_config.config(font=("Arial", 18, 'bold'))
     lbl_config.grid(row=0, column=0, pady=(25, 0))
 
     # Time Signature Text Frame ----------------------------------------------------------------------------------------
 
     frame_timesig_title = tkinter.Frame(app)
-    frame_timesig_title.configure(bg='white')
-    lbl_timesig = tkinter.Label(frame_timesig_title, bg="white", text="Time Signature:")
+    frame_timesig_title.configure(bg=background_color)
+    lbl_timesig = tkinter.Label(frame_timesig_title, bg=background_color, text="Time Signature:", fg=foreground_color)
     lbl_timesig.config(font=("Arial", 16))
     lbl_timesig.grid(row=0, column=0, pady=(20, 0))
 
     # Time Signature Buttons Frame -------------------------------------------------------------------------------------
 
     frame_timesig_buttons = tkinter.Frame(app)
-    frame_timesig_buttons.configure(bg='white')
+    frame_timesig_buttons.configure(bg=background_color)
 
     timesig_buttons = ["4/4", "3/4", "2/4", "5/4", "12/8", "6/8"]
 
@@ -88,15 +104,15 @@ if __name__ == '__main__':
     # Key Signature Text Frame -----------------------------------------------------------------------------------------
 
     frame_keysig_title = tkinter.Frame(app)
-    frame_keysig_title.configure(bg='white')
-    lbl_keysig_title = tkinter.Label(frame_keysig_title, bg="white", text="Key Signature:")
+    frame_keysig_title.configure(bg=background_color)
+    lbl_keysig_title = tkinter.Label(frame_keysig_title, bg=background_color, text="Key Signature:", fg=foreground_color)
     lbl_keysig_title.config(font=("Arial", 16))
     lbl_keysig_title.grid(row=0, column=0, pady=(20, 0))
 
     # Key Signature Buttons Frame --------------------------------------------------------------------------------------
 
     frame_keysig_buttons = tkinter.Frame(app)
-    frame_keysig_buttons.configure(bg='white')
+    frame_keysig_buttons.configure(bg=background_color)
 
     keysig_buttons = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"]
 
@@ -107,9 +123,9 @@ if __name__ == '__main__':
     # Tempo Frame ------------------------------------------------------------------------------------------------------
 
     frame_tempo = tkinter.Frame(app)
-    frame_tempo.configure(bg='white')
+    frame_tempo.configure(bg=background_color)
 
-    lbl_tempo = tkinter.Label(frame_tempo, bg="white", text="Tempo:")
+    lbl_tempo = tkinter.Label(frame_tempo, bg=background_color, text="Tempo:", fg=foreground_color)
     lbl_tempo.config(font=("Arial", 16))
     lbl_tempo.grid(row=0, column=0, pady=(25, 0))
 
@@ -117,25 +133,25 @@ if __name__ == '__main__':
     entry_tempo.config(font=("Arial", 16))
     entry_tempo.grid(row=0, column=1, pady=(25, 0))
 
-    lbl_bpm = tkinter.Label(frame_tempo, bg="white", text="bpm")
+    lbl_bpm = tkinter.Label(frame_tempo, bg=background_color, text="bpm", fg=foreground_color)
     lbl_bpm.config(font=("Arial", 16))
     lbl_bpm.grid(row=0, column=2, pady=(25, 0))
 
     # Create Score Button ----------------------------------------------------------------------------------------------
 
     frame_create_button = tkinter.Frame(app)
-    frame_create_button.configure(bg='white')
+    frame_create_button.configure(bg=background_color)
 
-    create_button = tkinter.Button(frame_create_button, text="Create Score with Configuration", width=25, height=2)
+    create_button = tkinter.Button(frame_create_button, text="Create Score with Configuration", width=25, height=2, command=play_sound)
     create_button.config(font=("Arial", 18))
     create_button.grid(row=2, column=0, pady=(25, 0))
 
     # Quit Button ------------------------------------------------------------------------------------------------------
 
     frame_quit = tkinter.Frame(app)
-    frame_quit.configure(bg='white')
+    frame_quit.configure(bg=background_color)
 
-    btn_quit = tkinter.Button(frame_quit, text="Quit", width=20, height=3)
+    btn_quit = tkinter.Button(frame_quit, text="Quit", width=20, height=3, command=quit)
     btn_quit.grid(row=0, column=0, pady=(20, 0))
 
     # Assembly ---------------------------------------------------------------------------------------------------------
