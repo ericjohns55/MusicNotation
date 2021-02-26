@@ -39,9 +39,96 @@ def key_press_event(event):
     char = ord(char_list[0])
 
     if len(char_list) == 1 and 97 <= char <= 103:
-        print(chr(char) + " " + str(char))
         note = AudioSegment.from_mp3(os.getcwd() + "\\sound\\" + chr(char).upper() + "4.mp3")[:200]
         play(note)
+
+
+def main_scene():
+    print("EEE")
+
+
+
+def score_scene():
+    frame_title.pack_forget()
+    icon.pack_forget()
+    frame_config.pack_forget()
+    frame_timesig_title.pack_forget()
+    frame_timesig_buttons.pack_forget()
+    frame_keysig_title.pack_forget()
+    frame_keysig_buttons.pack_forget()
+    frame_tempo.pack_forget()
+    frame_create_button.pack_forget()
+    frame_quit.pack_forget()
+
+    # Icon -------------------------------------------------------------------------------------------------------------
+
+    staff_image = Image.open(os.getcwd() + "\\images\\staff.png")
+    resized = ImageTk.PhotoImage(staff_image.resize((1280, 576)))
+
+    imageView = tkinter.Label(image=resized, bg=background_color)
+    imageView.image = resized
+
+    # Frame Frame ------------------------------------------------------------------------------------------------------
+
+    frame_rows = tkinter.Frame(app)
+    frame_rows.configure(bg=background_color)
+
+    # Note Length Buttons Frame ----------------------------------------------------------------------------------------
+
+    frame_note_length = tkinter.Frame(frame_rows)
+    frame_note_length.configure(bg=background_color)
+
+    note_lengths = ["1/16", "1/8", "1/4", "1/2", "1"]
+
+    for i in range(len(note_lengths)):
+        btn = tkinter.Button(frame_note_length, text=note_lengths[i], width=12, height=3)
+        btn.grid(row=0, column=i, padx=5, pady=(10, 0))
+
+    # Notes Button Frame -----------------------------------------------------------------------------------------------
+
+    frame_notes = tkinter.Frame(frame_rows)
+    frame_notes.configure(bg=background_color)
+
+    note_lengths = ["C", "D", "E", "F", "G", "A", "B"]
+
+    for i in range(len(note_lengths)):
+        btn = tkinter.Button(frame_notes, text=note_lengths[i], width=12, height=3)
+        btn.grid(row=0, column=i, padx=5, pady=(10, 0))
+
+    # Octave Buttons Frame ---------------------------------------------------------------------------------------------
+
+    frame_octave = tkinter.Frame(frame_rows)
+    frame_octave.configure(bg=background_color)
+
+    btn_octave_dec = tkinter.Button(frame_octave, text="-", width=12, height=3)
+    btn_octave_dec.grid(row=0, column=0, padx=5,)
+
+    lbl_octave = tkinter.Label(frame_octave, bg=background_color, text="Octave: 4", fg=foreground_color, width=12, height=3)
+    lbl_octave.config(font=("Arial", 16))
+    lbl_octave.grid(row=0, column=1, padx=(0, 20))
+
+    btn_octave_inc = tkinter.Button(frame_octave, text="+", width=12, height=3)
+    btn_octave_inc.grid(row=0, column=2, padx=5)
+
+    # Return Buttons ---------------------------------------------------------------------------------------------------
+
+    frame_returns = tkinter.Frame(frame_rows)
+    frame_returns.configure(bg=background_color)
+
+    btn_return = tkinter.Button(frame_returns, text="Return to Main Menu", width=30, height=3, command=play_sound)
+    btn_return.grid(row=0, column=0, padx=5)
+
+    btn_shutdown = tkinter.Button(frame_returns, text="Quit", width=30, height=3, command=quit)
+    btn_shutdown.grid(row=0, column=1, padx=5)
+
+    # Pack Frames ------------------------------------------------------------------------------------------------------
+
+    imageView.pack()
+    frame_notes.grid(row=0, column=0, padx=(14, 5))
+    frame_note_length.grid(row=0, column=1, padx=(5, 14))
+    frame_octave.grid(row=1, column=0, pady=(0, 0))
+    frame_returns.grid(row=1, column=1, pady=(0, 0))
+    frame_rows.pack()
 
 
 # Press the green button in the gutter to run the script.
@@ -142,9 +229,9 @@ if __name__ == '__main__':
     frame_create_button = tkinter.Frame(app)
     frame_create_button.configure(bg=background_color)
 
-    create_button = tkinter.Button(frame_create_button, text="Create Score with Configuration", width=25, height=2, command=play_sound)
+    create_button = tkinter.Button(frame_create_button, text="Create Score with Configuration", width=25, height=2, command=score_scene)
     create_button.config(font=("Arial", 18))
-    create_button.grid(row=2, column=0, pady=(25, 0))
+    create_button.grid(row=2, column=0, pady=(25, 10))
 
     # Quit Button ------------------------------------------------------------------------------------------------------
 
@@ -152,7 +239,7 @@ if __name__ == '__main__':
     frame_quit.configure(bg=background_color)
 
     btn_quit = tkinter.Button(frame_quit, text="Quit", width=20, height=3, command=quit)
-    btn_quit.grid(row=0, column=0, pady=(20, 0))
+    btn_quit.grid(row=0, column=0, pady=(10, 0))
 
     # Assembly ---------------------------------------------------------------------------------------------------------
 
