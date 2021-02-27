@@ -6,6 +6,7 @@
 from pydub import AudioSegment
 from pydub.playback import play
 from PIL import Image, ImageTk
+from tkinter import Widget
 import tkinter
 import keyboard
 import os
@@ -43,98 +44,254 @@ def key_press_event(event):
         play(note)
 
 
-def main_scene():
-    print("EEE")
+def generate_scene(scene):
+    # App Icon
+    image = Image.open(os.getcwd() + "\\images\\icon.png")
+    photo = ImageTk.PhotoImage(image.resize((96, 96)))
 
+    icon = tkinter.Label(image=photo, bg=background_color)
+    icon.image = photo
 
-
-def score_scene():
-    frame_title.pack_forget()
-    icon.pack_forget()
-    frame_config.pack_forget()
-    frame_timesig_title.pack_forget()
-    frame_timesig_buttons.pack_forget()
-    frame_keysig_title.pack_forget()
-    frame_keysig_buttons.pack_forget()
-    frame_tempo.pack_forget()
-    frame_create_button.pack_forget()
-    frame_quit.pack_forget()
-
-    # Icon -------------------------------------------------------------------------------------------------------------
-
+    # Staff
     staff_image = Image.open(os.getcwd() + "\\images\\staff.png")
     resized = ImageTk.PhotoImage(staff_image.resize((1280, 576)))
 
     imageView = tkinter.Label(image=resized, bg=background_color)
     imageView.image = resized
 
-    # Frame Frame ------------------------------------------------------------------------------------------------------
+    # Main Scene Frame Declaration
 
-    frame_rows = tkinter.Frame(app)
-    frame_rows.configure(bg=background_color)
+    frame_title = tkinter.Frame(app)
+    frame_config = tkinter.Frame(app)
+    frame_timesig_title = tkinter.Frame(app)
+    frame_timesig_buttons = tkinter.Frame(app)
+    frame_keysig_title = tkinter.Frame(app)
+    frame_keysig_buttons = tkinter.Frame(app)
+    frame_tempo = tkinter.Frame(app)
+    frame_create_button = tkinter.Frame(app)
+    frame_quit = tkinter.Frame(app)
 
-    # Note Length Buttons Frame ----------------------------------------------------------------------------------------
+    # Score Scene Frame Declaration
 
-    frame_note_length = tkinter.Frame(frame_rows)
-    frame_note_length.configure(bg=background_color)
+    frame_row1 = tkinter.Frame(app)
+    frame_row2 = tkinter.Frame(app)
+    frame_note_length = tkinter.Frame(frame_row1)
+    frame_notes = tkinter.Frame(frame_row1)
+    frame_accidentals = tkinter.Frame(frame_row2)
+    frame_octave = tkinter.Frame(frame_row2)
+    frame_returns = tkinter.Frame(frame_row2)
 
-    note_lengths = ["1/16", "1/8", "1/4", "1/2", "1"]
+    # Main Scene
+    if scene:
+        remove_children()
 
-    for i in range(len(note_lengths)):
-        btn = tkinter.Button(frame_note_length, text=note_lengths[i], width=12, height=3)
-        btn.grid(row=0, column=i, padx=5, pady=(10, 0))
+        # Title Frame --------------------------------------------------------------------------------------------------
 
-    # Notes Button Frame -----------------------------------------------------------------------------------------------
+        frame_title.configure(bg=background_color)
 
-    frame_notes = tkinter.Frame(frame_rows)
-    frame_notes.configure(bg=background_color)
+        title = tkinter.Label(frame_title, bg=background_color, text="Music Notation", fg=foreground_color)
+        title.config(font=("Arial", 24, 'bold'))
+        title.grid(row=0, column=0, pady=(25, 0))
 
-    note_lengths = ["C", "D", "E", "F", "G", "A", "B"]
+        # Configuration Label ------------------------------------------------------------------------------------------
 
-    for i in range(len(note_lengths)):
-        btn = tkinter.Button(frame_notes, text=note_lengths[i], width=12, height=3)
-        btn.grid(row=0, column=i, padx=5, pady=(10, 0))
+        frame_config.configure(bg=background_color)
+        lbl_config = tkinter.Label(frame_config, bg=background_color, text="Choose Score Configuration Below",
+                                   fg=foreground_color)
+        lbl_config.config(font=("Arial", 18, 'bold'))
+        lbl_config.grid(row=0, column=0, pady=(25, 0))
 
-    # Octave Buttons Frame ---------------------------------------------------------------------------------------------
+        # Time Signature Text Frame ------------------------------------------------------------------------------------
 
-    frame_octave = tkinter.Frame(frame_rows)
-    frame_octave.configure(bg=background_color)
+        frame_timesig_title.configure(bg=background_color)
+        lbl_timesig = tkinter.Label(frame_timesig_title, bg=background_color, text="Time Signature:",
+                                    fg=foreground_color)
+        lbl_timesig.config(font=("Arial", 16))
+        lbl_timesig.grid(row=0, column=0, pady=(20, 0))
 
-    btn_octave_dec = tkinter.Button(frame_octave, text="-", width=12, height=3)
-    btn_octave_dec.grid(row=0, column=0, padx=5,)
+        # Time Signature Buttons Frame ---------------------------------------------------------------------------------
 
-    lbl_octave = tkinter.Label(frame_octave, bg=background_color, text="Octave: 4", fg=foreground_color, width=12, height=3)
-    lbl_octave.config(font=("Arial", 16))
-    lbl_octave.grid(row=0, column=1, padx=(0, 20))
+        frame_timesig_buttons.configure(bg=background_color)
 
-    btn_octave_inc = tkinter.Button(frame_octave, text="+", width=12, height=3)
-    btn_octave_inc.grid(row=0, column=2, padx=5)
+        timesig_buttons = ["4/4", "3/4", "2/4", "5/4", "12/8", "6/8"]
 
-    # Return Buttons ---------------------------------------------------------------------------------------------------
+        for i in range(len(timesig_buttons)):
+            btn_timesig = tkinter.Button(frame_timesig_buttons, text=timesig_buttons[i], width=12, height=3)
+            btn_timesig.grid(row=0, column=i, padx=5, pady=(20, 0))
 
-    frame_returns = tkinter.Frame(frame_rows)
-    frame_returns.configure(bg=background_color)
+        # Key Signature Text Frame -------------------------------------------------------------------------------------
 
-    btn_return = tkinter.Button(frame_returns, text="Return to Main Menu", width=30, height=3, command=play_sound)
-    btn_return.grid(row=0, column=0, padx=5)
+        frame_keysig_title.configure(bg=background_color)
+        lbl_keysig_title = tkinter.Label(frame_keysig_title, bg=background_color, text="Key Signature:",
+                                         fg=foreground_color)
+        lbl_keysig_title.config(font=("Arial", 16))
+        lbl_keysig_title.grid(row=0, column=0, pady=(20, 0))
 
-    btn_shutdown = tkinter.Button(frame_returns, text="Quit", width=30, height=3, command=quit)
-    btn_shutdown.grid(row=0, column=1, padx=5)
+        # Key Signature Buttons Frame ----------------------------------------------------------------------------------
 
-    # Pack Frames ------------------------------------------------------------------------------------------------------
+        frame_keysig_buttons.configure(bg=background_color)
 
-    imageView.pack()
-    frame_notes.grid(row=0, column=0, padx=(14, 5))
-    frame_note_length.grid(row=0, column=1, padx=(5, 14))
-    frame_octave.grid(row=1, column=0, pady=(0, 0))
-    frame_returns.grid(row=1, column=1, pady=(0, 0))
-    frame_rows.pack()
+        keysig_buttons = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"]
+
+        for i in range(len(keysig_buttons)):
+            btn_keysig = tkinter.Button(frame_keysig_buttons, text=keysig_buttons[i], width=12, height=3)
+            btn_keysig.grid(row=0, column=i, padx=5, pady=(20, 0))
+
+        # Tempo Frame --------------------------------------------------------------------------------------------------
+
+        frame_tempo.configure(bg=background_color)
+
+        lbl_tempo = tkinter.Label(frame_tempo, bg=background_color, text="Tempo:", fg=foreground_color)
+        lbl_tempo.config(font=("Arial", 16))
+        lbl_tempo.grid(row=0, column=0, pady=(25, 0))
+
+        entry_tempo = tkinter.Entry(frame_tempo, text="Tempo", validate='key', vcmd=(app.register(validate), '%S'))
+        entry_tempo.config(font=("Arial", 16))
+        entry_tempo.grid(row=0, column=1, pady=(25, 0))
+
+        lbl_bpm = tkinter.Label(frame_tempo, bg=background_color, text="bpm", fg=foreground_color)
+        lbl_bpm.config(font=("Arial", 16))
+        lbl_bpm.grid(row=0, column=2, pady=(25, 0))
+
+        # Create Score Button ------------------------------------------------------------------------------------------
+
+        frame_create_button.configure(bg=background_color)
+
+        create_button = tkinter.Button(frame_create_button, text="Create Score with Configuration", width=25, height=2,
+                                       command=lambda: generate_scene(False))
+        create_button.config(font=("Arial", 18))
+        create_button.grid(row=2, column=0, pady=(25, 10))
+
+        # Quit Button --------------------------------------------------------------------------------------------------
+
+        frame_quit.configure(bg=background_color)
+
+        btn_quit = tkinter.Button(frame_quit, text="Quit", width=20, height=3, command=quit)
+        btn_quit.grid(row=0, column=0, pady=(10, 0))
+
+        # Assembly -----------------------------------------------------------------------------------------------------
+
+        frame_title.pack()
+        icon.pack()
+        frame_config.pack()
+        frame_timesig_title.pack()
+        frame_timesig_buttons.pack()
+        frame_keysig_title.pack()
+        frame_keysig_buttons.pack()
+        frame_tempo.pack()
+        frame_create_button.pack()
+        frame_quit.pack()
+    else:
+        remove_children()
+
+        # Row Frames ---------------------------------------------------------------------------------------------------
+
+        frame_row1.configure(bg=background_color)
+
+        frame_row2.configure(bg=background_color)
+
+        # Note Length Buttons Frame ------------------------------------------------------------------------------------
+
+        frame_note_length.configure(bg=background_color)
+
+        note_lengths = ["1/16", "1/8", "1/4", "1/2", "1"]
+
+        for i in range(len(note_lengths)):
+            btn_note_length = tkinter.Button(frame_note_length, text=note_lengths[i], width=12, height=3, command=lambda: select_option(btn_note_length))
+            btn_note_length.grid(row=0, column=i, padx=5, pady=(10, 0))
+
+        # Notes Button Frame -------------------------------------------------------------------------------------------
+
+        frame_notes.configure(bg=background_color)
+
+        note_lengths = ["C", "D", "E", "F", "G", "A", "B"]
+
+        for i in range(len(note_lengths)):
+            btn_note_name = tkinter.Button(frame_notes, text=note_lengths[i], width=12, height=3)
+            btn_note_name.grid(row=0, column=i, padx=5, pady=(10, 0))
+
+        # Accidentals Button Frame -------------------------------------------------------------------------------------
+
+        frame_accidentals.configure(bg=background_color)
+
+        btn_flat = tkinter.Button(frame_accidentals, text="b", width=12, height=3, command=lambda: select_option(btn_flat))
+        btn_flat.grid(row=0, column=0, padx=5)
+
+        btn_sharp = tkinter.Button(frame_accidentals, text="#", width=12, height=3, command=lambda: select_option(btn_sharp))
+        btn_sharp.grid(row=0, column=1, padx=5)
+
+        # Octave Buttons Frame -----------------------------------------------------------------------------------------
+
+        frame_octave.configure(bg=background_color)
+
+        lbl_octave = tkinter.Label(frame_octave, bg=background_color, text="Octave: 4", fg=foreground_color,
+                                   width=12, height=3)
+
+        btn_octave_dec = tkinter.Button(frame_octave, text="-", width=12, height=3,
+                                        command=lambda: update_octave(False, lbl_octave))
+        btn_octave_dec.grid(row=0, column=0, padx=5)
+
+        lbl_octave.config(font=("Arial", 16))
+        lbl_octave.grid(row=0, column=1, padx=(0, 20))
+
+        btn_octave_inc = tkinter.Button(frame_octave, text="+", width=12, height=3,
+                                        command=lambda: update_octave(True, lbl_octave))
+        btn_octave_inc.grid(row=0, column=2, padx=5)
+
+        # Return Buttons -----------------------------------------------------------------------------------------------
+
+        frame_returns.configure(bg=background_color)
+
+        btn_return = tkinter.Button(frame_returns, text="Return to Main Menu", width=30, height=3,
+                                    command=lambda: generate_scene(True))
+        btn_return.grid(row=0, column=0, padx=5)
+
+        btn_shutdown = tkinter.Button(frame_returns, text="Quit", width=30, height=3, command=quit)
+        btn_shutdown.grid(row=0, column=1, padx=5)
+
+        # Pack Frames --------------------------------------------------------------------------------------------------
+
+        imageView.pack()
+        frame_notes.grid(row=0, column=0, padx=(14, 5))
+        frame_note_length.grid(row=0, column=1, padx=(5, 14))
+        frame_accidentals.grid(row=0, column=0, padx=(56, 30), pady=(0, 0))
+        frame_octave.grid(row=0, column=1, padx=(62, 0), pady=(0, 0))
+        frame_returns.grid(row=0, column=2, padx=(45, 25), pady=(0, 0))
+        frame_row1.pack()
+        frame_row2.pack()
+
+
+def remove_children():
+    widgets = app.winfo_children()
+
+    for item in widgets:
+        item.pack_forget()
+
+
+def update_octave(increment, lbl):
+    octave = int(lbl.cget("text")[-1])
+    octave += (1 if increment else -1)
+
+    if 3 <= octave <= 6:
+        lbl.config(text=("Octave: " + str(octave)))
+
+
+def select_option(button):
+    parent_frame = Widget.nametowidget(app, button.winfo_parent())
+    children = parent_frame.winfo_children()
+
+    for child in children:
+        child.config(bg=button_background)
+
+    button.config(bg=selected)
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     background_color = "gray"
     foreground_color = "white"
+    button_background = "#F0F0F0"
+    selected = "blue"
 
     app = tkinter.Tk()
     app.title("Music Notation")
@@ -144,114 +301,6 @@ if __name__ == '__main__':
 
     keyboard.on_press(key_press_event)
 
-    # Title Frame ------------------------------------------------------------------------------------------------------
+    generate_scene(True)
 
-    frame_title = tkinter.Frame(app)
-    frame_title.configure(bg=background_color)
-
-    title = tkinter.Label(frame_title, bg=background_color, text="Music Notation", fg=foreground_color)
-    title.config(font=("Arial", 24, 'bold'))
-    title.grid(row=0, column=0, pady=(25, 0))
-
-    # Icon -------------------------------------------------------------------------------------------------------------
-
-    image = Image.open(os.getcwd() + "\\images\\icon.png")
-    photo = ImageTk.PhotoImage(image.resize((96, 96)))
-
-    icon = tkinter.Label(image=photo, bg=background_color)
-    icon.image = photo
-
-    # Configuration Label ----------------------------------------------------------------------------------------------
-
-    frame_config = tkinter.Frame(app)
-    frame_config.configure(bg=background_color)
-    lbl_config = tkinter.Label(frame_config, bg=background_color, text="Choose Score Configuration Below", fg=foreground_color)
-    lbl_config.config(font=("Arial", 18, 'bold'))
-    lbl_config.grid(row=0, column=0, pady=(25, 0))
-
-    # Time Signature Text Frame ----------------------------------------------------------------------------------------
-
-    frame_timesig_title = tkinter.Frame(app)
-    frame_timesig_title.configure(bg=background_color)
-    lbl_timesig = tkinter.Label(frame_timesig_title, bg=background_color, text="Time Signature:", fg=foreground_color)
-    lbl_timesig.config(font=("Arial", 16))
-    lbl_timesig.grid(row=0, column=0, pady=(20, 0))
-
-    # Time Signature Buttons Frame -------------------------------------------------------------------------------------
-
-    frame_timesig_buttons = tkinter.Frame(app)
-    frame_timesig_buttons.configure(bg=background_color)
-
-    timesig_buttons = ["4/4", "3/4", "2/4", "5/4", "12/8", "6/8"]
-
-    for i in range(len(timesig_buttons)):
-        btn = tkinter.Button(frame_timesig_buttons, text=timesig_buttons[i], width=12, height=3)
-        btn.grid(row=0, column=i, padx=5, pady=(20, 0))
-
-    # Key Signature Text Frame -----------------------------------------------------------------------------------------
-
-    frame_keysig_title = tkinter.Frame(app)
-    frame_keysig_title.configure(bg=background_color)
-    lbl_keysig_title = tkinter.Label(frame_keysig_title, bg=background_color, text="Key Signature:", fg=foreground_color)
-    lbl_keysig_title.config(font=("Arial", 16))
-    lbl_keysig_title.grid(row=0, column=0, pady=(20, 0))
-
-    # Key Signature Buttons Frame --------------------------------------------------------------------------------------
-
-    frame_keysig_buttons = tkinter.Frame(app)
-    frame_keysig_buttons.configure(bg=background_color)
-
-    keysig_buttons = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"]
-
-    for i in range(len(keysig_buttons)):
-        btn = tkinter.Button(frame_keysig_buttons, text=keysig_buttons[i], width=12, height=3)
-        btn.grid(row=0, column=i, padx=5, pady=(20, 0))
-
-    # Tempo Frame ------------------------------------------------------------------------------------------------------
-
-    frame_tempo = tkinter.Frame(app)
-    frame_tempo.configure(bg=background_color)
-
-    lbl_tempo = tkinter.Label(frame_tempo, bg=background_color, text="Tempo:", fg=foreground_color)
-    lbl_tempo.config(font=("Arial", 16))
-    lbl_tempo.grid(row=0, column=0, pady=(25, 0))
-
-    entry_tempo = tkinter.Entry(frame_tempo, text="Tempo", validate='key', vcmd=(app.register(validate), '%S'))
-    entry_tempo.config(font=("Arial", 16))
-    entry_tempo.grid(row=0, column=1, pady=(25, 0))
-
-    lbl_bpm = tkinter.Label(frame_tempo, bg=background_color, text="bpm", fg=foreground_color)
-    lbl_bpm.config(font=("Arial", 16))
-    lbl_bpm.grid(row=0, column=2, pady=(25, 0))
-
-    # Create Score Button ----------------------------------------------------------------------------------------------
-
-    frame_create_button = tkinter.Frame(app)
-    frame_create_button.configure(bg=background_color)
-
-    create_button = tkinter.Button(frame_create_button, text="Create Score with Configuration", width=25, height=2, command=score_scene)
-    create_button.config(font=("Arial", 18))
-    create_button.grid(row=2, column=0, pady=(25, 10))
-
-    # Quit Button ------------------------------------------------------------------------------------------------------
-
-    frame_quit = tkinter.Frame(app)
-    frame_quit.configure(bg=background_color)
-
-    btn_quit = tkinter.Button(frame_quit, text="Quit", width=20, height=3, command=quit)
-    btn_quit.grid(row=0, column=0, pady=(10, 0))
-
-    # Assembly ---------------------------------------------------------------------------------------------------------
-
-    frame_title.pack()
-    icon.pack()
-    frame_config.pack()
-    frame_timesig_title.pack()
-    frame_timesig_buttons.pack()
-    frame_keysig_title.pack()
-    frame_keysig_buttons.pack()
-    frame_tempo.pack()
-    frame_create_button.pack()
-    frame_quit.pack()
     app.mainloop()
-
