@@ -7,9 +7,19 @@ from pydub import AudioSegment
 from pydub.playback import play
 from PIL import Image, ImageTk
 from tkinter import Widget
+from tkinter import messagebox
 import tkinter
-import keyboard
+# import keyboard
 import os
+import note
+
+
+octave = 4
+accidental = 1
+
+time_sig = "N"
+key_sig = "N"
+tempo = 0
 
 
 def validate(char):
@@ -35,13 +45,20 @@ def play_sound():
     play(mixed_audio2)
 
 
-def key_press_event(event):
-    char_list = list(event.name.lower())
-    char = ord(char_list[0])
+def validate_form():
+    if not key_sig == "N" and not time_sig == "N" and tempo > 0:
+        generate_scene(False)
+    else:
+        error = ""
 
-    if len(char_list) == 1 and 97 <= char <= 103:
-        note = AudioSegment.from_mp3(os.getcwd() + "\\sound\\" + chr(char).upper() + "4.mp3")[:200]
-        play(note)
+        if key_sig == "N":
+            error += "Please select a valid key signature.\n"
+        if time_sig == "N":
+            error += "Please select a valid time signature.\n"
+        if not tempo > 0:
+            error += "Please enter a valid tempo (greater than 0)"
+
+        messagebox.showerror("Invalid Configuration", error)
 
 
 def generate_scene(scene):
@@ -64,9 +81,9 @@ def generate_scene(scene):
     frame_title = tkinter.Frame(app)
     frame_config = tkinter.Frame(app)
     frame_timesig_title = tkinter.Frame(app)
-    frame_timesig_buttons = tkinter.Frame(app)
+    frame_timesig_buttons = tkinter.Frame(app, name="time_sig")
     frame_keysig_title = tkinter.Frame(app)
-    frame_keysig_buttons = tkinter.Frame(app)
+    frame_keysig_buttons = tkinter.Frame(app, name="key_sig")
     frame_tempo = tkinter.Frame(app)
     frame_create_button = tkinter.Frame(app)
     frame_quit = tkinter.Frame(app)
@@ -117,6 +134,7 @@ def generate_scene(scene):
 
         for i in range(len(timesig_buttons)):
             btn_timesig = tkinter.Button(frame_timesig_buttons, text=timesig_buttons[i], width=12, height=3)
+            btn_timesig.config(command=lambda btn_timesig=btn_timesig: select_option(btn_timesig))
             btn_timesig.grid(row=0, column=i, padx=5, pady=(20, 0))
 
         # Key Signature Text Frame -------------------------------------------------------------------------------------
@@ -135,6 +153,7 @@ def generate_scene(scene):
 
         for i in range(len(keysig_buttons)):
             btn_keysig = tkinter.Button(frame_keysig_buttons, text=keysig_buttons[i], width=12, height=3)
+            btn_keysig.config(command=lambda btn_keysig=btn_keysig: select_option(btn_keysig))
             btn_keysig.grid(row=0, column=i, padx=5, pady=(20, 0))
 
         # Tempo Frame --------------------------------------------------------------------------------------------------
@@ -145,7 +164,16 @@ def generate_scene(scene):
         lbl_tempo.config(font=("Arial", 16))
         lbl_tempo.grid(row=0, column=0, pady=(25, 0))
 
-        entry_tempo = tkinter.Entry(frame_tempo, text="Tempo", validate='key', vcmd=(app.register(validate), '%S'))
+        string_var = tkinter.StringVar()
+        string_var.trace("w", lambda name, index, mode, string_var=string_var: tempo_change())
+
+        def tempo_change():
+            global tempo
+            tempo = int(string_var.get())
+            return True
+
+        entry_tempo = tkinter.Entry(frame_tempo, text="Tempo", validate='key', vcmd=(app.register(validate), '%S'),
+                                    textvariable=string_var)
         entry_tempo.config(font=("Arial", 16))
         entry_tempo.grid(row=0, column=1, pady=(25, 0))
 
@@ -158,7 +186,7 @@ def generate_scene(scene):
         frame_create_button.configure(bg=background_color)
 
         create_button = tkinter.Button(frame_create_button, text="Create Score with Configuration", width=25, height=2,
-                                       command=lambda: generate_scene(False))
+                                       command=lambda: validate_form())
         create_button.config(font=("Arial", 18))
         create_button.grid(row=2, column=0, pady=(25, 10))
 
@@ -197,7 +225,8 @@ def generate_scene(scene):
         note_lengths = ["1/16", "1/8", "1/4", "1/2", "1"]
 
         for i in range(len(note_lengths)):
-            btn_note_length = tkinter.Button(frame_note_length, text=note_lengths[i], width=12, height=3, command=lambda: select_option(btn_note_length))
+            btn_note_length = tkinter.Button(frame_note_length, text=note_lengths[i], width=12, height=3)
+            btn_note_length.config(command=lambda btn_note_length=btn_note_length: select_option(btn_note_length))
             btn_note_length.grid(row=0, column=i, padx=5, pady=(10, 0))
 
         # Notes Button Frame -------------------------------------------------------------------------------------------
@@ -208,16 +237,17 @@ def generate_scene(scene):
 
         for i in range(len(note_lengths)):
             btn_note_name = tkinter.Button(frame_notes, text=note_lengths[i], width=12, height=3)
+            btn_note_name.config(command=lambda btn_note_name=btn_note_name: play_sample_note(btn_note_name))
             btn_note_name.grid(row=0, column=i, padx=5, pady=(10, 0))
 
         # Accidentals Button Frame -------------------------------------------------------------------------------------
 
         frame_accidentals.configure(bg=background_color)
 
-        btn_flat = tkinter.Button(frame_accidentals, text="b", width=12, height=3, command=lambda: select_option(btn_flat))
+        btn_flat = tkinter.Button(frame_accidentals, text="b", width=12, height=3, command=lambda: accidentals(btn_flat))
         btn_flat.grid(row=0, column=0, padx=5)
 
-        btn_sharp = tkinter.Button(frame_accidentals, text="#", width=12, height=3, command=lambda: select_option(btn_sharp))
+        btn_sharp = tkinter.Button(frame_accidentals, text="#", width=12, height=3, command=lambda: accidentals(btn_sharp))
         btn_sharp.grid(row=0, column=1, padx=5)
 
         # Octave Buttons Frame -----------------------------------------------------------------------------------------
@@ -269,11 +299,36 @@ def remove_children():
 
 
 def update_octave(increment, lbl):
+    global octave
     octave = int(lbl.cget("text")[-1])
     octave += (1 if increment else -1)
 
     if 3 <= octave <= 6:
         lbl.config(text=("Octave: " + str(octave)))
+
+
+def accidentals(button):
+    def clear_other():
+        children = Widget.nametowidget(app, button.winfo_parent()).winfo_children()
+
+        for child in children:
+            if not child == button:
+                child.config(bg=button_background)
+
+    global accidental
+
+    if button.cget("bg") == selected_color:
+        button.config(bg=button_background)
+        clear_other()
+        accidental = 1
+    else:
+        button.config(bg=selected_color)
+        clear_other()
+
+        if button.cget("text") == "b":
+            accidental = 0
+        else:
+            accidental = 2
 
 
 def select_option(button):
@@ -283,15 +338,44 @@ def select_option(button):
     for child in children:
         child.config(bg=button_background)
 
-    button.config(bg=selected)
+    button.config(bg=selected_color)
+
+    frame_name = parent_frame.winfo_name()
+
+    if frame_name == "time_sig":
+        global time_sig
+        time_sig = button.cget("text")
+    elif frame_name == "key_sig":
+        global key_sig
+        key_sig = button.cget("text")
+
+
+def play_sample_note(button):
+    note_name = button.cget("text")
+
+    sound_file = note.Note(note_name, octave, accidental).get_sound_file()
+
+    if not sound_file == "NONE":
+        sound = AudioSegment.from_mp3(os.getcwd() + "\\sound\\" + sound_file + ".mp3")[:250]
+        play(sound)
+    else:
+        print("Note out of range of this program")
+
+
+# def key_press_event(event):
+#     char_list = list(event.name.lower())
+#     char = ord(char_list[0])
+#
+#     if len(char_list) == 1 and 97 <= char <= 103:
+#         # Will eventually work for note input
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    background_color = "gray"
-    foreground_color = "white"
-    button_background = "#F0F0F0"
-    selected = "blue"
+    background_color = "white"
+    foreground_color = "black"
+    button_background = "SystemButtonFace"
+    selected_color = "lightgray"
 
     app = tkinter.Tk()
     app.title("Music Notation")
@@ -299,7 +383,7 @@ if __name__ == '__main__':
     app.configure(bg=background_color)
     app.resizable(False, False)
 
-    keyboard.on_press(key_press_event)
+    # keyboard.on_press(key_press_event)
 
     generate_scene(True)
 
