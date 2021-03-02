@@ -9,6 +9,7 @@ from PIL import Image, ImageTk
 from tkinter import Widget
 from tkinter import messagebox
 import tkinter
+import pyglet
 # import keyboard
 import os
 import note
@@ -382,6 +383,8 @@ if __name__ == '__main__':
     app.geometry("1280x720")
     app.configure(bg=background_color)
     app.resizable(False, False)
+
+    pyglet.font.add_file(os.getcwd() + "\\Musiqwik.ttf")
 
     # keyboard.on_press(key_press_event)
 
