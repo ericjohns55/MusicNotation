@@ -12,15 +12,12 @@ import tkinter
 import pyglet
 # import keyboard
 import os
+
+from variables import Variables
 import note
+import setup_score
+import score_widget
 
-
-octave = 4
-accidental = 1
-
-time_sig = "N"
-key_sig = "N"
-tempo = 0
 
 
 def validate(char):
@@ -47,16 +44,16 @@ def play_sound():
 
 
 def validate_form():
-    if not key_sig == "N" and not time_sig == "N" and tempo > 0:
+    if not Variables.key_sig == "N" and not Variables.time_sig == "N" and Variables.tempo > 0:
         generate_scene(False)
     else:
         error = ""
 
-        if key_sig == "N":
+        if Variables.key_sig == "N":
             error += "Please select a valid key signature.\n"
-        if time_sig == "N":
+        if Variables.time_sig == "N":
             error += "Please select a valid time signature.\n"
-        if not tempo > 0:
+        if not Variables.tempo > 0:
             error += "Please enter a valid tempo (greater than 0)"
 
         messagebox.showerror("Invalid Configuration", error)
@@ -93,7 +90,8 @@ def generate_scene(scene):
 
     frame_row1 = tkinter.Frame(app)
     frame_row2 = tkinter.Frame(app)
-    frame_note_length = tkinter.Frame(frame_row1)
+    frame_score = tkinter.Frame(app)
+    frame_note_length = tkinter.Frame(frame_row1, name="note_length")
     frame_notes = tkinter.Frame(frame_row1)
     frame_accidentals = tkinter.Frame(frame_row2)
     frame_octave = tkinter.Frame(frame_row2)
@@ -131,7 +129,7 @@ def generate_scene(scene):
 
         frame_timesig_buttons.configure(bg=background_color)
 
-        timesig_buttons = ["4/4", "3/4", "2/4", "5/4", "12/8", "6/8"]
+        timesig_buttons = ["4/4", "3/4", "2/4", "6/8", "Cut"]
 
         for i in range(len(timesig_buttons)):
             btn_timesig = tkinter.Button(frame_timesig_buttons, text=timesig_buttons[i], width=12, height=3)
@@ -150,7 +148,7 @@ def generate_scene(scene):
 
         frame_keysig_buttons.configure(bg=background_color)
 
-        keysig_buttons = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"]
+        keysig_buttons = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"]
 
         for i in range(len(keysig_buttons)):
             btn_keysig = tkinter.Button(frame_keysig_buttons, text=keysig_buttons[i], width=12, height=3)
@@ -169,8 +167,7 @@ def generate_scene(scene):
         string_var.trace("w", lambda name, index, mode, string_var=string_var: tempo_change())
 
         def tempo_change():
-            global tempo
-            tempo = int(string_var.get())
+            Variables.tempo = int(string_var.get())
             return True
 
         entry_tempo = tkinter.Entry(frame_tempo, text="Tempo", validate='key', vcmd=(app.register(validate), '%S'),
@@ -218,6 +215,18 @@ def generate_scene(scene):
         frame_row1.configure(bg=background_color)
 
         frame_row2.configure(bg=background_color)
+
+        # Score Frame --------------------------------------------------------------------------------------------------
+
+        score = setup_score.ScoreSetup(Variables.time_sig, Variables.key_sig, Variables.tempo)
+
+        text_entry = score_widget.ScoreWidget(frame_score, width=1200, height=5)
+        text_entry.config(font=("Musiqwik", 42))
+        text_entry.insert(1.0, score.get_setup())
+        # text_entry.bind("<<TextModified>>", score_modify)
+
+        text_entry.pack()
+
 
         # Note Length Buttons Frame ------------------------------------------------------------------------------------
 
@@ -282,7 +291,8 @@ def generate_scene(scene):
 
         # Pack Frames --------------------------------------------------------------------------------------------------
 
-        imageView.pack()
+        #imageView.pack()
+        frame_score.pack()
         frame_notes.grid(row=0, column=0, padx=(14, 5))
         frame_note_length.grid(row=0, column=1, padx=(5, 14))
         frame_accidentals.grid(row=0, column=0, padx=(56, 30), pady=(0, 0))
@@ -300,12 +310,11 @@ def remove_children():
 
 
 def update_octave(increment, lbl):
-    global octave
-    octave = int(lbl.cget("text")[-1])
-    octave += (1 if increment else -1)
+    Variables.octave = int(lbl.cget("text")[-1])
+    Variables.octave += (1 if increment else -1)
 
-    if 3 <= octave <= 6:
-        lbl.config(text=("Octave: " + str(octave)))
+    if 3 <= Variables.octave <= 5:
+        lbl.config(text=("Octave: " + str(Variables.octave)))
 
 
 def accidentals(button):
@@ -316,20 +325,18 @@ def accidentals(button):
             if not child == button:
                 child.config(bg=button_background)
 
-    global accidental
-
     if button.cget("bg") == selected_color:
         button.config(bg=button_background)
         clear_other()
-        accidental = 1
+        Variables.accidental = 1
     else:
         button.config(bg=selected_color)
         clear_other()
 
         if button.cget("text") == "b":
-            accidental = 0
+            Variables.accidental = 0
         else:
-            accidental = 2
+            Variables.accidental = 2
 
 
 def select_option(button):
@@ -344,23 +351,27 @@ def select_option(button):
     frame_name = parent_frame.winfo_name()
 
     if frame_name == "time_sig":
-        global time_sig
-        time_sig = button.cget("text")
+        Variables.time_sig = button.cget("text")
     elif frame_name == "key_sig":
-        global key_sig
-        key_sig = button.cget("text")
+        Variables.key_sig = button.cget("text")
+    elif frame_name == "note_length":
+        Variables.note_length = str(button.cget("text").replace("1/", ""))
 
 
 def play_sample_note(button):
     note_name = button.cget("text")
 
-    sound_file = note.Note(note_name, octave, accidental).get_sound_file()
+    sound_file = note.Note(note_name, Variables.octave, Variables.accidental).get_sound_file()
 
     if not sound_file == "NONE":
         sound = AudioSegment.from_mp3(os.getcwd() + "\\sound\\" + sound_file + ".mp3")[:250]
         play(sound)
     else:
         print("Note out of range of this program")
+
+
+# def score_modify(event):
+#     print(event.widget.get(1.0, tkinter.END))
 
 
 # def key_press_event(event):
