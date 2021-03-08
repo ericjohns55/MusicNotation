@@ -1,6 +1,7 @@
 import tkinter
 import note_lookup
 from variables import Variables
+import math
 
 
 class ScoreWidget(tkinter.Text):
@@ -46,4 +47,16 @@ class ScoreWidget(tkinter.Text):
         if current_note in note_lookup.note_dictionary[str(Variables.note_length)]:
             note_addition = note_lookup.note_dictionary[str(Variables.note_length)][current_note]
             self.insert(tkinter.END, note_addition)
+
+        Variables.current_measure_length += 1.0 / float(Variables.note_length)
+        print(str(Variables.current_measure_length))
+        print(str(Variables.get_measure_length()))
+
+        if Variables.current_measure_length > Variables.get_measure_length():
+            Variables.current_measure_length = 0.0          # Fix issues in case something gets off
+
+        if math.isclose(Variables.get_measure_length(), Variables.current_measure_length):
+            Variables.current_measure_length = 0.0
+            self.insert(tkinter.END, "!=")
+
 
