@@ -21,13 +21,15 @@ class ScoreWidget(tkinter.Text):
             self.event_generate("<<TextModified>>")
 
         if command == "insert" and len(args[1]) == 1:
-            self.add_note(args[1], self.get(1.0, tkinter.END))
+            self.add_note(args[1], True)    # self.get(1.0, tkinter.END)
 
         return result
 
-    def add_note(self, note, full_string):
-
-        string = self.get(1.0, "end-2c")
+    def add_note(self, note, input_event):
+        if input_event:
+            string = self.get(1.0, "end-2c")
+        else:
+            string = self.get(1.0, "end-1c")
 
         current_note = note.upper()
 

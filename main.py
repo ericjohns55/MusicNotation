@@ -10,14 +10,12 @@ from tkinter import Widget
 from tkinter import messagebox
 import tkinter
 import pyglet
-# import keyboard
 import os
 
 from variables import Variables
 import note
 import setup_score
 import score_widget
-
 
 
 def validate(char):
@@ -90,7 +88,6 @@ def generate_scene(scene):
 
     frame_row1 = tkinter.Frame(app)
     frame_row2 = tkinter.Frame(app)
-    frame_score = tkinter.Frame(app)
     frame_note_length = tkinter.Frame(frame_row1, name="note_length")
     frame_notes = tkinter.Frame(frame_row1)
     frame_accidentals = tkinter.Frame(frame_row2)
@@ -220,7 +217,6 @@ def generate_scene(scene):
 
         score = setup_score.ScoreSetup(Variables.time_sig, Variables.key_sig, Variables.tempo)
 
-        text_entry = score_widget.ScoreWidget(frame_score, width=1200, height=5)
         text_entry.config(font=("Musiqwik", 42))
         text_entry.insert(1.0, score.get_setup())
         # text_entry.bind("<<TextModified>>", score_modify)
@@ -360,6 +356,7 @@ def select_option(button):
 
 def play_sample_note(button):
     note_name = button.cget("text")
+    text_entry.add_note(note_name, False)
 
     sound_file = note.Note(note_name, Variables.octave, Variables.accidental).get_sound_file()
 
@@ -368,18 +365,6 @@ def play_sample_note(button):
         play(sound)
     else:
         print("Note out of range of this program")
-
-
-# def score_modify(event):
-#     print(event.widget.get(1.0, tkinter.END))
-
-
-# def key_press_event(event):
-#     char_list = list(event.name.lower())
-#     char = ord(char_list[0])
-#
-#     if len(char_list) == 1 and 97 <= char <= 103:
-#         # Will eventually work for note input
 
 
 # Press the green button in the gutter to run the script.
@@ -397,7 +382,8 @@ if __name__ == '__main__':
 
     pyglet.font.add_file(os.getcwd() + "\\Musiqwik.ttf")
 
-    # keyboard.on_press(key_press_event)
+    frame_score = tkinter.Frame(app)
+    text_entry = score_widget.ScoreWidget(frame_score, width=1200, height=5)
 
     generate_scene(True)
 
