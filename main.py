@@ -215,10 +215,10 @@ def generate_scene(scene):
 
         # Score Frame --------------------------------------------------------------------------------------------------
 
-        score = setup_score.ScoreSetup(Variables.time_sig, Variables.key_sig, Variables.tempo)
+        # score = setup_score.ScoreSetup(Variables.time_sig, Variables.key_sig, Variables.tempo)
 
         text_entry.config(font=("Musiqwik", 42))
-        text_entry.insert(1.0, score.get_setup())
+        text_entry.setup_score()
         # text_entry.bind("<<TextModified>>", score_modify)
 
         text_entry.pack()
