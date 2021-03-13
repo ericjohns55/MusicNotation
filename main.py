@@ -92,11 +92,13 @@ def generate_scene(scene):
     frame_notes = tkinter.Frame(frame_row1)
     frame_accidentals = tkinter.Frame(frame_row2)
     frame_octave = tkinter.Frame(frame_row2)
+    frame_play = tkinter.Frame(frame_row2)
     frame_returns = tkinter.Frame(frame_row2)
 
     # Main Scene
     if scene:
         remove_children()
+        text_entry.delete(1.0, tkinter.END)
 
         # Title Frame --------------------------------------------------------------------------------------------------
 
@@ -183,7 +185,11 @@ def generate_scene(scene):
         create_button = tkinter.Button(frame_create_button, text="Create Score with Configuration", width=25, height=2,
                                        command=lambda: validate_form())
         create_button.config(font=("Arial", 18))
-        create_button.grid(row=2, column=0, pady=(25, 10))
+        create_button.grid(row=0, column=0, padx=5, pady=(25, 10))
+
+        load_button = tkinter.Button(frame_create_button, text="Load Score from File", width=25, height=2)
+        load_button.config(font=("Arial", 18))
+        load_button.grid(row=0, column=1, padx=5, pady=(25, 10))
 
         # Quit Button --------------------------------------------------------------------------------------------------
 
@@ -228,18 +234,22 @@ def generate_scene(scene):
 
         frame_note_length.configure(bg=background_color)
 
-        note_lengths = ["1/16", "1/8", "1/4", "1/2", "1"]
+        note_lengths = ["1/8", "1/4", "1/2", "1"]
 
         for i in range(len(note_lengths)):
             btn_note_length = tkinter.Button(frame_note_length, text=note_lengths[i], width=12, height=3)
             btn_note_length.config(command=lambda btn_note_length=btn_note_length: select_option(btn_note_length))
             btn_note_length.grid(row=0, column=i, padx=5, pady=(10, 0))
 
+            if btn_note_length.cget("text") == "1/4":
+                btn_note_length.config(bg=selected_color)
+
+
         # Notes Button Frame -------------------------------------------------------------------------------------------
 
         frame_notes.configure(bg=background_color)
 
-        note_lengths = ["C", "D", "E", "F", "G", "A", "B"]
+        note_lengths = ["A", "B", "C", "D", "E", "F", "G", "Rest"]
 
         for i in range(len(note_lengths)):
             btn_note_name = tkinter.Button(frame_notes, text=note_lengths[i], width=12, height=3)
@@ -260,7 +270,7 @@ def generate_scene(scene):
 
         frame_octave.configure(bg=background_color)
 
-        lbl_octave = tkinter.Label(frame_octave, bg=background_color, text="Octave: 4", fg=foreground_color,
+        lbl_octave = tkinter.Label(frame_octave, bg=background_color, text="Octave: +0", fg=foreground_color,
                                    width=12, height=3)
 
         btn_octave_dec = tkinter.Button(frame_octave, text="-", width=12, height=3,
@@ -274,26 +284,36 @@ def generate_scene(scene):
                                         command=lambda: update_octave(True, lbl_octave))
         btn_octave_inc.grid(row=0, column=2, padx=5)
 
+        # Play/Pause Button Frame --------------------------------------------------------------------------------------
+
+        frame_play.configure(bg=background_color)
+
+        btn_play = tkinter.Button(frame_play, text="Play", width=18, height=3, command=lambda: play_score(btn_play))
+        btn_play.grid(row=0, column=0)
+
         # Return Buttons -----------------------------------------------------------------------------------------------
 
         frame_returns.configure(bg=background_color)
 
-        btn_return = tkinter.Button(frame_returns, text="Return to Main Menu", width=30, height=3,
+        btn_return = tkinter.Button(frame_returns, text="Return to Main Menu", width=17, height=3,
                                     command=lambda: generate_scene(True))
-        btn_return.grid(row=0, column=0, padx=5)
+        btn_return.grid(row=0, column=0, padx=(15, 5))
 
-        btn_shutdown = tkinter.Button(frame_returns, text="Quit", width=30, height=3, command=quit)
-        btn_shutdown.grid(row=0, column=1, padx=5)
+        btn_save = tkinter.Button(frame_returns, text="Save", width=17, height=3)
+        btn_save.grid(row=0, column=1, padx=5)
+
+        btn_shutdown = tkinter.Button(frame_returns, text="Quit", width=17, height=3, command=quit)
+        btn_shutdown.grid(row=0, column=2, padx=5)
 
         # Pack Frames --------------------------------------------------------------------------------------------------
 
-        #imageView.pack()
         frame_score.pack()
         frame_notes.grid(row=0, column=0, padx=(14, 5))
         frame_note_length.grid(row=0, column=1, padx=(5, 14))
-        frame_accidentals.grid(row=0, column=0, padx=(56, 30), pady=(0, 0))
-        frame_octave.grid(row=0, column=1, padx=(62, 0), pady=(0, 0))
-        frame_returns.grid(row=0, column=2, padx=(45, 25), pady=(0, 0))
+        frame_play.grid(row=0, column=0, padx=(18, 5), pady=(0, 0))
+        frame_accidentals.grid(row=0, column=1, padx=(50, 32), pady=(0, 0))
+        frame_octave.grid(row=0, column=2, padx=(19, 0), pady=(0, 0))
+        frame_returns.grid(row=0, column=3, padx=(0, 25), pady=(0, 0))
         frame_row1.pack()
         frame_row2.pack()
 
@@ -309,8 +329,8 @@ def update_octave(increment, lbl):
     Variables.octave = int(lbl.cget("text")[-1])
     Variables.octave += (1 if increment else -1)
 
-    if 3 <= Variables.octave <= 5:
-        lbl.config(text=("Octave: " + str(Variables.octave)))
+    if 0 <= Variables.octave <= 2:
+        lbl.config(text=("Octave: +" + str(Variables.octave)))
 
 
 def accidentals(button):
@@ -351,20 +371,32 @@ def select_option(button):
     elif frame_name == "key_sig":
         Variables.key_sig = button.cget("text")
     elif frame_name == "note_length":
-        Variables.note_length = str(button.cget("text").replace("1/", ""))
+        Variables.note_length = int(button.cget("text").replace("1/", ""))
 
 
 def play_sample_note(button):
     note_name = button.cget("text")
+
+    if note_name.lower() == "rest":
+        note_name = "R"
+
     text_entry.add_note(note_name, False)
 
-    sound_file = note.Note(note_name, Variables.octave, Variables.accidental).get_sound_file()
+    if note != "REST":
+        sound_file = note.Note(note_name, Variables.octave, Variables.accidental).get_sound_file()
 
-    if not sound_file == "NONE":
-        sound = AudioSegment.from_mp3(os.getcwd() + "\\sound\\" + sound_file + ".mp3")[:250]
-        play(sound)
+        if not sound_file == "NONE":
+            sound = AudioSegment.from_mp3(os.getcwd() + "\\sound\\" + sound_file + ".mp3")[:250]
+            play(sound)
+
+
+def play_score(button):
+    Variables.playing = not Variables.playing
+
+    if Variables.playing:
+        button.configure(text="Stop")
     else:
-        print("Note out of range of this program")
+        button.configure(text="Play")
 
 
 # Press the green button in the gutter to run the script.

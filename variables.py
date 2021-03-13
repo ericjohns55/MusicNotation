@@ -1,11 +1,13 @@
 class Variables:
-    octave = 4
+    octave = 0
     accidental = 1
-    note_length = 8
+    note_length = 4
 
     time_sig = "N"
     key_sig = "N"
     tempo = 0
+
+    playing = False
 
     current_measure_length = 0.0
 

@@ -1,7 +1,8 @@
 import tkinter
-import note_lookup
+from note_lookup import LookupNote
 import font_dictionary
 from variables import Variables
+import note_lookup
 import difflib
 import math
 
@@ -49,7 +50,7 @@ class ScoreWidget(tkinter.Text):
         for i, s in enumerate(difflib.ndiff(self.previous_text, self.get(1.0, tkinter.END))):
             if s[0] == "-":
                 print("Deleted " + s[-1] + " from index " + str(i))
-                new_string = new_text[:i] + self.convert_to_rest(s[-1]) + new_text[i:]
+                new_string = new_text[:i] + LookupNote.convert_to_rest(s[-1]) + new_text[i:]
                 print(new_text)
                 break
 
@@ -57,8 +58,6 @@ class ScoreWidget(tkinter.Text):
         self.insert(1.0, new_string)
 
     def add_note(self, note, input_event):
-        print("add note called")
-
         if input_event:
             string = self.get(1.0, "end-2c")
         else:
@@ -66,19 +65,21 @@ class ScoreWidget(tkinter.Text):
 
         current_note = note.upper()
 
-        if Variables.accidental == 0:
-            current_note += "b"
-        elif Variables.accidental == 2:
-            current_note += "S"
-
-        current_note += str(Variables.octave)
-
         self.delete("1.0", tkinter.END)
         self.insert(tkinter.END, string)
 
-        if current_note in note_lookup.note_dictionary[str(Variables.note_length)]:
-            note_addition = note_lookup.note_dictionary[str(Variables.note_length)][current_note]
-            self.insert(tkinter.END, note_addition)
+        if Variables.octave == 2 and ord(current_note) > 65:
+            return
+
+        if current_note in note_lookup.naturals:
+            if current_note == "R":
+                append = LookupNote.get_rest(Variables.note_length)
+            else:
+                append = LookupNote.get_note(current_note, Variables.octave, Variables.note_length,
+                                                     Variables.accidental)
+            self.insert(tkinter.END, append)
+        else:
+            return
 
         Variables.current_measure_length += 1.0 / float(Variables.note_length)
 
@@ -91,20 +92,5 @@ class ScoreWidget(tkinter.Text):
 
         self.previous_text = self.get(1.0, tkinter.END)
 
-    def convert_to_rest(self, note):
-        char = ord(note)
-
-        if 64 <= char <= 79:
-            return "9"
-        elif 80 <= char <= 94:
-            return ":"
-        elif 96 <= char <= 111:
-            return ";"
-        elif 112 <= char <= 126:
-            return "<"
-        elif char == 32:
-            return "="
-
-        return ""
 
 
