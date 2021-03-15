@@ -5,6 +5,7 @@ from variables import Variables
 import note_lookup
 import difflib
 import math
+from tkinter import messagebox
 
 
 class ScoreWidget(tkinter.Text):
@@ -26,9 +27,8 @@ class ScoreWidget(tkinter.Text):
             self.event_generate("<<TextModified>>")
 
         if command == "insert" and len(args[1]) == 1:
-            self.add_note(args[1], True)    # self.get(1.0, tkinter.END)
+            self.add_note(args[1], True)
         elif command == "delete" and len(args) == 1:
-            # print("DELETE: " + self.get(1.0, tkinter.END))
             self.remove_note()
 
         return result
@@ -40,57 +40,71 @@ class ScoreWidget(tkinter.Text):
         self.previous_text = score
 
     def remove_note(self):
-        # print("Original: " + self.previous_text)
-        # print("New: " + self.get(1.0, tkinter.END))
-
         new_text = self.get(1.0, "end-1c")
 
         new_string = " "
 
         for i, s in enumerate(difflib.ndiff(self.previous_text, self.get(1.0, tkinter.END))):
             if s[0] == "-":
-                print("Deleted " + s[-1] + " from index " + str(i))
                 new_string = new_text[:i] + LookupNote.convert_to_rest(s[-1]) + new_text[i:]
-                print(new_text)
                 break
 
         self.delete(1.0, tkinter.END)
         self.insert(1.0, new_string)
 
     def add_note(self, note, input_event):
-        if input_event:
-            string = self.get(1.0, "end-2c")
-        else:
-            string = self.get(1.0, "end-1c")
+        insert_index = self.index(tkinter.INSERT)
 
-        current_note = note.upper()
-
-        self.delete("1.0", tkinter.END)
-        self.insert(tkinter.END, string)
-
-        if Variables.octave == 2 and ord(current_note) > 65:
-            return
-
-        if current_note in note_lookup.naturals:
-            if current_note == "R":
-                append = LookupNote.get_rest(Variables.note_length)
+        if int(insert_index.split(".")[1]) == len(self.get(1.0, "end-1c")):
+            if input_event:
+                string = self.get(1.0, "end-2c")
             else:
-                append = LookupNote.get_note(current_note, Variables.octave, Variables.note_length,
-                                                     Variables.accidental)
-            self.insert(tkinter.END, append)
+                string = self.get(1.0, "end-1c")
+
+            current_note = note.upper()
+
+            self.delete("1.0", tkinter.END)
+            self.insert(tkinter.END, string)
+
+            if Variables.octave == 2 and ord(current_note) > 65:
+                return
+
+            if Variables.current_measure_length + (1.0 / float(Variables.note_length)) > Variables.get_measure_length():
+                messagebox.showerror("Invalid Configuration", "ERROR: This note is too long to fit in this measure!")
+                return
+
+            if current_note in note_lookup.naturals:
+                if current_note == "R":
+                    append = LookupNote.get_rest(Variables.note_length)
+                else:
+                    append = LookupNote.get_note(current_note, Variables.octave, Variables.note_length,
+                                                         Variables.accidental)
+                self.insert(tkinter.END, append)
+            else:
+                return
+
+            Variables.current_measure_length += 1.0 / float(Variables.note_length)
+
+            if math.isclose(Variables.get_measure_length(), Variables.current_measure_length):
+                Variables.current_measure_length = 0.0
+                self.insert(tkinter.END, "!=")
+
+            self.previous_text = self.get(1.0, tkinter.END)
         else:
-            return
+            split = insert_index.split(".")
+            next_index = split[0] + "." + str(int(split[1]) + 1)
 
-        Variables.current_measure_length += 1.0 / float(Variables.note_length)
+            if LookupNote.replaceable(self.get(insert_index, next_index)):
+                rest_char = self.get(insert_index, next_index)
+                first_half = self.get(1.0, split[0] + "." + str(int(split[1]) - 1))
+                second_half = self.get(split[0] + "." + str(int(split[1]) + 2), "end-1c")
 
-        if Variables.current_measure_length > Variables.get_measure_length():
-            Variables.current_measure_length = 0.0          # Fix issues in case something gets off
+                self.delete(1.0, tkinter.END)
+                self.insert(tkinter.END, first_half + LookupNote.get_note(note.upper(), Variables.octave,
+                                                                          LookupNote.get_note_length(rest_char),
+                                                                          Variables.accidental) + second_half)
 
-        if math.isclose(Variables.get_measure_length(), Variables.current_measure_length):
-            Variables.current_measure_length = 0.0
-            self.insert(tkinter.END, "!=")
-
-        self.previous_text = self.get(1.0, tkinter.END)
-
-
-
+                self.previous_text = self.get(1.0, tkinter.END)
+            else:
+                self.delete(1.0, tkinter.END)
+                self.insert(1.0, self.previous_text)

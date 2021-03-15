@@ -4,6 +4,7 @@ sharps = {"C": "CS", "D": "DS", "E": "F", "F": "FS", "G": "GS", "A": "AS", "B": 
 
 naturals = ["A", "B", "C", "D", "E", "F", "G", "R"]
 
+rests = ["9", ":", ";", "<"]
 
 class LookupNote:
     @staticmethod
@@ -64,3 +65,24 @@ class LookupNote:
             rest = "<"
 
         return rest + "="
+
+    @staticmethod
+    def get_note_length(note):
+        length = 0
+
+        if note == "9" or 64 <= ord(note) <= 79:
+            length = 8
+        elif note == ":" or 80 <= ord(note) <= 94:
+            length = 4
+        elif note == ";" or 96 <= ord(note) <= 111:
+            length = 2
+        elif note == "<" or 112 <= ord(note) <= 126:
+            length = 1
+
+        return length
+
+    @staticmethod
+    def replaceable(note):
+        if 64 <= ord(note) <= 126 or note in rests:
+            return True
+        return False
