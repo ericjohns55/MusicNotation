@@ -55,6 +55,10 @@ class ScoreWidget(tkinter.Text):
     def add_note(self, note, input_event):
         insert_index = self.index(tkinter.INSERT)
 
+        if note == "`":
+            self.break_rest(insert_index)
+            return
+
         if int(insert_index.split(".")[1]) == len(self.get(1.0, "end-1c")):
             if input_event:
                 string = self.get(1.0, "end-2c")
@@ -78,7 +82,7 @@ class ScoreWidget(tkinter.Text):
                     append = LookupNote.get_rest(Variables.note_length)
                 else:
                     append = LookupNote.get_note(current_note, Variables.octave, Variables.note_length,
-                                                         Variables.accidental)
+                                                 Variables.accidental)
                 self.insert(tkinter.END, append)
             else:
                 return
@@ -93,8 +97,9 @@ class ScoreWidget(tkinter.Text):
         else:
             split = insert_index.split(".")
             next_index = split[0] + "." + str(int(split[1]) + 1)
+            character = self.get(insert_index, next_index)
 
-            if LookupNote.replaceable(self.get(insert_index, next_index)):
+            if LookupNote.replaceable(character):
                 rest_char = self.get(insert_index, next_index)
                 first_half = self.get(1.0, split[0] + "." + str(int(split[1]) - 1))
                 second_half = self.get(split[0] + "." + str(int(split[1]) + 2), "end-1c")
@@ -108,3 +113,34 @@ class ScoreWidget(tkinter.Text):
             else:
                 self.delete(1.0, tkinter.END)
                 self.insert(1.0, self.previous_text)
+
+    def break_rest(self, insert_index):
+        split = insert_index.split(".")
+        next_index = split[0] + "." + str(int(split[1]) + 1)
+
+        if len(self.get(insert_index, next_index)) == 1:
+            character = self.get(insert_index, next_index)
+
+            if len(character) != 0 and LookupNote.breakable(character):
+                if character == ":":
+                    replace = "9=9="
+                elif character == ";":
+                    replace = ":=:="
+                else:
+                    replace = ";=;="
+
+                first_half = self.get(1.0, split[0] + "." + str(int(split[1]) - 1))
+                second_half = self.get(split[0] + "." + str(int(split[1]) + 2), "end-1c")
+
+                self.delete(1.0, tkinter.END)
+                self.insert(tkinter.END, first_half + replace + second_half)
+
+                self.previous_text = self.get(1.0, tkinter.END)
+            else:
+                self.cancel_event()
+        else:
+            self.cancel_event()
+
+    def cancel_event(self):
+        self.delete(1.0, tkinter.END)
+        self.insert(1.0, self.previous_text)

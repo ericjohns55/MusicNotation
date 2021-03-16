@@ -86,3 +86,7 @@ class LookupNote:
         if 64 <= ord(note) <= 126 or note in rests:
             return True
         return False
+
+    @staticmethod
+    def breakable(rest):
+        return 58 <= ord(rest) <= 60
