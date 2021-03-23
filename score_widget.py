@@ -59,7 +59,7 @@ class ScoreWidget(tkinter.Text):
             self.break_rest(insert_index)
             return
 
-        if int(insert_index.split(".")[1]) == len(self.get(1.0, "end-1c")):
+        if int(insert_index.split(".")[1]) == len(self.get(1.0, "end-1c")):  # PROBLEM HERE
             if input_event:
                 string = self.get(1.0, "end-2c")
             else:
@@ -93,7 +93,7 @@ class ScoreWidget(tkinter.Text):
                 Variables.current_measure_length = 0.0
                 self.insert(tkinter.END, "!=")
 
-            self.previous_text = self.get(1.0, tkinter.END)
+            self.save_last_text()
         else:
             split = insert_index.split(".")
             next_index = split[0] + "." + str(int(split[1]) + 1)
@@ -109,7 +109,7 @@ class ScoreWidget(tkinter.Text):
                                                                           LookupNote.get_note_length(rest_char),
                                                                           Variables.accidental) + second_half)
 
-                self.previous_text = self.get(1.0, tkinter.END)
+                self.save_last_text()
             else:
                 self.delete(1.0, tkinter.END)
                 self.insert(1.0, self.previous_text)
@@ -126,16 +126,19 @@ class ScoreWidget(tkinter.Text):
                     replace = "9=9="
                 elif character == ";":
                     replace = ":=:="
-                else:
+                elif character == "<":
                     replace = ";=;="
+                else:
+                    note = ord(character) - 16
+                    replace = chr(note) + "=" + chr(note) + "="
 
                 first_half = self.get(1.0, split[0] + "." + str(int(split[1]) - 1))
-                second_half = self.get(split[0] + "." + str(int(split[1]) + 2), "end-1c")
+                second_half = self.get(split[0] + "." + str(int(split[1]) + 2), "end-2c")
 
                 self.delete(1.0, tkinter.END)
                 self.insert(tkinter.END, first_half + replace + second_half)
 
-                self.previous_text = self.get(1.0, tkinter.END)
+                self.save_last_text()
             else:
                 self.cancel_event()
         else:
@@ -144,3 +147,9 @@ class ScoreWidget(tkinter.Text):
     def cancel_event(self):
         self.delete(1.0, tkinter.END)
         self.insert(1.0, self.previous_text)
+
+    def save_last_text(self):
+        self.previous_text = self.get(1.0, "end-1c")
+
+        if not self.previous_text.endswith("="):
+            self.previous_text += "="

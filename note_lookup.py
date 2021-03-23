@@ -89,4 +89,4 @@ class LookupNote:
 
     @staticmethod
     def breakable(rest):
-        return 58 <= ord(rest) <= 60
+        return 58 <= ord(rest) <= 60 or 80 <= ord(rest) <= 126
