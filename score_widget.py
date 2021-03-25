@@ -5,6 +5,8 @@ from variables import Variables
 import note_lookup
 import difflib
 import math
+import playback
+import winsound
 from tkinter import messagebox
 
 
@@ -16,6 +18,7 @@ class ScoreWidget(tkinter.Text):
         self.tk.call("rename", self._w, self._orig)
         self.tk.createcommand(self._w, self._proxy)
         self.previous_text = ""
+        self.playback = playback.Playback()
 
     def _proxy(self, command, *args):
         cmd = (self._orig, command) + args
@@ -83,6 +86,8 @@ class ScoreWidget(tkinter.Text):
                 else:
                     append = LookupNote.get_note(current_note, Variables.octave, Variables.note_length,
                                                  Variables.accidental)
+                    winsound.Beep(int(self.playback.get_note_frequency(current_note, Variables.octave)), 200)
+
                 self.insert(tkinter.END, append)
             else:
                 return

@@ -9,6 +9,7 @@ from PIL import Image, ImageTk
 from tkinter import Widget
 from tkinter import messagebox
 import tkinter
+import winsound
 import pyglet
 import os
 
@@ -395,6 +396,12 @@ def play_score(button):
 
     if Variables.playing:
         button.configure(text="Stop")
+
+        winsound.Beep(440, 100)
+        winsound.Beep(540, 100)
+
+        Variables.playing = False
+        button.configure(text="Play")
     else:
         button.configure(text="Play")
 
