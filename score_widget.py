@@ -5,7 +5,7 @@ from variables import Variables
 import note_lookup
 import difflib
 import math
-import playback
+from playback import Playback
 import winsound
 from tkinter import messagebox
 
@@ -18,7 +18,6 @@ class ScoreWidget(tkinter.Text):
         self.tk.call("rename", self._w, self._orig)
         self.tk.createcommand(self._w, self._proxy)
         self.previous_text = ""
-        self.playback = playback.Playback()
 
     def _proxy(self, command, *args):
         cmd = (self._orig, command) + args
@@ -86,11 +85,12 @@ class ScoreWidget(tkinter.Text):
                 else:
                     append = LookupNote.get_note(current_note, Variables.octave, Variables.note_length,
                                                  Variables.accidental)
-                    winsound.Beep(int(self.playback.get_note_frequency(current_note, Variables.octave)), 200)
 
                 self.insert(tkinter.END, append)
             else:
                 return
+
+            Playback.play_tone(current_note, Variables.octave, Variables.accidental)
 
             Variables.current_measure_length += 1.0 / float(Variables.note_length)
 
@@ -109,10 +109,13 @@ class ScoreWidget(tkinter.Text):
                 first_half = self.get(1.0, split[0] + "." + str(int(split[1]) - 1))
                 second_half = self.get(split[0] + "." + str(int(split[1]) + 2), "end-1c")
 
+                new_note = LookupNote.get_note(note.upper(), Variables.octave, LookupNote.get_note_length(rest_char),
+                                               Variables.accidental)
+
                 self.delete(1.0, tkinter.END)
-                self.insert(tkinter.END, first_half + LookupNote.get_note(note.upper(), Variables.octave,
-                                                                          LookupNote.get_note_length(rest_char),
-                                                                          Variables.accidental) + second_half)
+                self.insert(tkinter.END, first_half + new_note + second_half)
+
+                Playback.play_tone(note.upper(), Variables.octave, Variables.accidental)
 
                 self.save_last_text()
             else:
@@ -134,11 +137,12 @@ class ScoreWidget(tkinter.Text):
                 elif character == "<":
                     replace = ";=;="
                 else:
-                    note = ord(character) - 16
-                    replace = chr(note) + "=" + chr(note) + "="
+                    note = chr(ord(character) - 16)
+                    rest = LookupNote.get_rest(LookupNote.get_note_length(note))
+                    replace = note + "=" + rest
 
                 first_half = self.get(1.0, split[0] + "." + str(int(split[1]) - 1))
-                second_half = self.get(split[0] + "." + str(int(split[1]) + 2), "end-2c")
+                second_half = self.get(split[0] + "." + str(int(split[1]) + 2), "end-1c")
 
                 self.delete(1.0, tkinter.END)
                 self.insert(tkinter.END, first_half + replace + second_half)

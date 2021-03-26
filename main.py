@@ -8,14 +8,13 @@ from pydub.playback import play
 from PIL import Image, ImageTk
 from tkinter import Widget
 from tkinter import messagebox
+import playback
 import tkinter
 import winsound
 import pyglet
 import os
 
 from variables import Variables
-import note
-import setup_score
 import score_widget
 
 
@@ -254,7 +253,7 @@ def generate_scene(scene):
 
         for i in range(len(note_lengths)):
             btn_note_name = tkinter.Button(frame_notes, text=note_lengths[i], width=12, height=3)
-            btn_note_name.config(command=lambda btn_note_name=btn_note_name: play_sample_note(btn_note_name))
+            btn_note_name.config(command=lambda btn_note_name=btn_note_name: note_button(btn_note_name))
             btn_note_name.grid(row=0, column=i, padx=5, pady=(10, 0))
 
         # Accidentals Button Frame -------------------------------------------------------------------------------------
@@ -375,7 +374,7 @@ def select_option(button):
         Variables.note_length = int(button.cget("text").replace("1/", ""))
 
 
-def play_sample_note(button):
+def note_button(button):
     note_name = button.cget("text")
 
     if note_name.lower() == "rest":
@@ -383,22 +382,19 @@ def play_sample_note(button):
 
     text_entry.add_note(note_name, False)
 
-    if note != "REST":
-        sound_file = note.Note(note_name, Variables.octave, Variables.accidental).get_sound_file()
-
-        if not sound_file == "NONE":
-            sound = AudioSegment.from_mp3(os.getcwd() + "\\sound\\" + sound_file + ".mp3")[:250]
-            play(sound)
-
 
 def play_score(button):
     Variables.playing = not Variables.playing
+
+    score_playback = playback.Playback(text_entry.get(1.0, tkinter.END))
 
     if Variables.playing:
         button.configure(text="Stop")
 
         winsound.Beep(440, 100)
         winsound.Beep(540, 100)
+
+        score_playback.parse()
 
         Variables.playing = False
         button.configure(text="Play")

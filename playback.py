@@ -1,6 +1,38 @@
-class Playback:
-    note_frequencies = [207.65, 220, 233.08, 246.94, 261.63, 277.18, 293.66, 311.13, 329.63, 349.23, 369.99, 392, 415.3, 440, 466.16, 493.88, 523.25, 554.37, 587.33, 622.25, 659.25, 698.46, 739.99, 783.99, 830.61, 880, 932.33]
+from note import Note
+from variables import Variables
+import winsound
 
-    def get_note_frequency(self, note, octave):
-        index = (ord(note) - 65) + (7 * octave)
-        return self.note_frequencies[index]
+class Playback:
+    def __init__(self, text):
+        self.score = text
+
+    def parse(self):
+        print(len(self.score))
+
+        array = self.score[7:]
+
+        measures = array.split("!")
+
+        for i in range(len(measures)):
+            individual_notes = measures[i].split("=")
+
+            for j in range(len(individual_notes)):
+                if individual_notes[j] != "" and individual_notes[j] != "\n":
+                    note = Note(individual_notes[j])
+                    print(note.get_test_string())
+
+    @staticmethod
+    def play_tone(note, octave, accidentals):
+        if note.upper() == "R":
+            return
+
+        note_name = note.upper() + str(octave)
+
+        if accidentals == 0:
+            frequency = Note.flat_frequencies[note_name]
+        elif accidentals == 1:
+            frequency = Note.natural_frequencies[note_name]
+        else:
+            frequency = Note.sharp_frequencies[note_name]
+
+        winsound.Beep(frequency, 200)

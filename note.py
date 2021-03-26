@@ -1,65 +1,72 @@
-import note_lookup
-
+from note_lookup import LookupNote
+from variables import Variables
 
 class Note:
-    def __init__(self, name, octave, accidental):
-        self.name = name
-        self.octave = octave
-        self.accidental = accidental
+    natural_frequencies = {
+        "A0": 220, "B0": 247, "C0": 262, "D0": 294, "E0": 330, "F0": 349, "G0": 392,
+        "A1": 440, "B1": 494, "C1": 523, "D1": 587, "E1": 659, "F1": 698, "G1": 784,
+        "A2": 880
+    }
 
-        self.normalize()
+    sharp_frequencies = {
+        "A0": 233, "B0": 262, "C0": 277, "D0": 311, "E0": 349, "F0": 370, "G0": 415,
+        "A1": 466, "B1": 523, "C1": 554, "D1": 622, "E1": 698, "F1": 740, "G1": 831,
+        "A2": 932
+    }
 
-    def normalize(self):
-        if self.accidental == 0:
-            if self.name == "C":
-                self.name = "B"
-                self.accidental = 1
-                self.octave -= 1
-        elif self.accidental == 2:
-            if self.name == "B":
-                self.name = "C"
-                self.accidental = 1
-                self.octave += 1
+    flat_frequencies = {
+        "A0": 208, "B0": 233, "C0": 247, "D0": 277, "E0": 311, "F0": 330, "G0": 370,
+        "A1": 415, "B1": 466, "C1": 494, "D1": 554, "E1": 622, "F1": 659, "G1": 740,
+        "A2": 831
+    }
 
-    def get_name(self):
-        return self.name
+    def __init__(self, note_excerpt):
+        self.note_excerpt = note_excerpt
+        self.octave = 0
 
-    def get_octave(self):
-        return self.octave
+        if len(note_excerpt) == 1:
+            self.note_symbol = note_excerpt
+            self.accidental = 1
+        elif len(note_excerpt) == 2:
+            self.note_symbol = note_excerpt[-1]
 
-    def get_accidental(self):
-        return self.accidental
+            accidental_symbol = note_excerpt[0]
 
-    def check_sound_range(self):
-        if not 3 <= self.octave <= 6:
-            return False
+            if 208 <= ord(accidental_symbol) <= 222:
+                self.accidental = 2
+            elif 224 <= ord(accidental_symbol) <= 238:
+                self.accidental = 0
 
-        char = ord(self.name.lower())
+        self.note_name = self.get_note_name(self.note_symbol)
+        self.length = LookupNote.get_note_length(self.note_symbol)
 
-        if self.octave == 3 and 99 <= char <= 101:
-            return False
-        elif self.octave == 6 and not 99 <= char <= 102:
-            return False
-        elif self.octave == 6 and self.name == "F" and self.accidental == 2:
-            return False
-        elif self.octave == 3 and self.name == "F" and self.accidental == 0:
-            return False
+    def get_test_string(self):
+        return self.note_name + " " + str(self.octave) + " " + str(self.length) + " " + str(self.accidental)
 
-        return True
+    def get_note_name(self, note_excerpt):
+        note_length = LookupNote.get_note_length(note_excerpt)
 
-    def get_sound_file(self):
-        if self.check_sound_range():
-            note_file = ""
-
-            if self.accidental == 0:
-                note_file = note_lookup.flats[self.name]
-            elif self.accidental == 1:
-                note_file = self.name
-            else:
-                note_file = note_lookup.sharps[self.name]
-
-            note_file += str(self.octave)
-
-            return note_file
+        if note_length == 8:
+            octave_adjust = int((ord(note_excerpt) - 64) / 7)
+            note_name = ord(note_excerpt) + 1 - (7 * octave_adjust)
+        elif note_length == 4:
+            octave_adjust = int((ord(note_excerpt) - 80) / 7)
+            note_name = -16 + ord(note_excerpt) + 1 - (7 * octave_adjust)
+        elif note_length == 2:
+            octave_adjust = int((ord(note_excerpt) - 96) / 7)
+            note_name = -32 + ord(note_excerpt) + 1 - (7 * octave_adjust)
+        elif note_length == 1:
+            octave_adjust = int((ord(note_excerpt) - 112) / 7)
+            note_name = -48 + ord(note_excerpt) + 1 - (7 * octave_adjust)
         else:
-            return "NONE"
+            octave_adjust = 0
+            note_name = 81
+
+        self.octave = octave_adjust
+
+        #ord(note_excerpt) + 1 - octave_adjust
+
+        return chr(note_name)
+
+    def get_string(self):
+        return self.note_excerpt

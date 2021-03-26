@@ -12,25 +12,35 @@ class LookupNote:
         octave_adjust = octave * 7
         note_string = ""
 
-        if length == 8:
-            ascii_code = ord(note) - 1 + octave_adjust
-            note_string += chr(ascii_code)
-        elif length == 4:
-            ascii_code = 16 + ord(note) - 1 + octave_adjust
-            note_string += chr(ascii_code)
-        elif length == 2:
-            ascii_code = 32 + ord(note) - 1 + octave_adjust
-            note_string += chr(ascii_code)
-        elif length == 1:
-            ascii_code = 48 + ord(note) - 1 + octave_adjust
-            note_string += chr(ascii_code)
+        if note.upper() == "R":
+            if length == 8:
+                note_string = rests[0]
+            elif length == 4:
+                note_string = rests[1]
+            elif length == 2:
+                note_string = rests[2]
+            elif length == 1:
+                note_string = rests[3]
+        else:
+            if length == 8:
+                ascii_code = ord(note) - 1 + octave_adjust
+                note_string += chr(ascii_code)
+            elif length == 4:
+                ascii_code = 16 + ord(note) - 1 + octave_adjust
+                note_string += chr(ascii_code)
+            elif length == 2:
+                ascii_code = 32 + ord(note) - 1 + octave_adjust
+                note_string += chr(ascii_code)
+            elif length == 1:
+                ascii_code = 48 + ord(note) - 1 + octave_adjust
+                note_string += chr(ascii_code)
 
-        if accidental == 0:
-            flat = 224 + ((ord(note) - 65) + octave_adjust)
-            note_string = chr(flat) + note_string
-        elif accidental == 2:
-            sharp = 208 + ((ord(note) - 65) + octave_adjust)
-            note_string = chr(sharp) + note_string
+            if accidental == 0:
+                flat = 224 + ((ord(note) - 65) + octave_adjust)
+                note_string = chr(flat) + note_string
+            elif accidental == 2:
+                sharp = 208 + ((ord(note) - 65) + octave_adjust)
+                note_string = chr(sharp) + note_string
 
         return note_string + "="
 
