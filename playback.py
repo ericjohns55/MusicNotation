@@ -3,6 +3,7 @@ from note_lookup import LookupNote
 from variables import Variables
 import winsound
 
+
 class Playback:
     def __init__(self, text):
         self.score = text

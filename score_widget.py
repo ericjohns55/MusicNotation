@@ -35,8 +35,12 @@ class ScoreWidget(tkinter.Text):
         return result
 
     def setup_score(self):
-        score = "&=" + font_dictionary.key_sig_lookup[Variables.key_sig] + "=" +\
-               font_dictionary.time_sig_lookup[Variables.time_sig] + "=="
+        if Variables.file_setup:
+            score = Variables.file_score
+        else:
+            score = "&=" + font_dictionary.key_sig_lookup[Variables.key_sig] + "=" + \
+                    font_dictionary.time_sig_lookup[Variables.time_sig] + "=="
+
         self.insert(1.0, score)
         self.previous_text = score
 

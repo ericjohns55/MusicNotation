@@ -7,9 +7,10 @@ class Variables:
     key_sig = "N"
     tempo = 0
 
-    playing = False
-
     current_measure_length = 0.0
+
+    file_setup = False
+    file_score = ""
 
     @staticmethod
     def get_measure_length():

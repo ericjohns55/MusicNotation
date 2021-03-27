@@ -8,6 +8,8 @@ from pydub.playback import play
 from PIL import Image, ImageTk
 from tkinter import Widget
 from tkinter import messagebox
+from tkinter import filedialog
+from os.path import expanduser
 import playback
 import tkinter
 import winsound
@@ -99,6 +101,13 @@ def generate_scene(scene):
     if scene:
         remove_children()
         text_entry.delete(1.0, tkinter.END)
+        Variables.tempo = 0
+        Variables.time_sig = "N"
+        Variables.key_sig = "N"
+
+        if Variables.file_setup:
+            Variables.file_setup = False
+            Variables.file_score = ""
 
         # Title Frame --------------------------------------------------------------------------------------------------
 
@@ -187,7 +196,7 @@ def generate_scene(scene):
         create_button.config(font=("Arial", 18))
         create_button.grid(row=0, column=0, padx=5, pady=(25, 10))
 
-        load_button = tkinter.Button(frame_create_button, text="Load Score from File", width=25, height=2)
+        load_button = tkinter.Button(frame_create_button, text="Load Score from File", width=25, height=2, command=load_file)
         load_button.config(font=("Arial", 18))
         load_button.grid(row=0, column=1, padx=5, pady=(25, 10))
 
@@ -289,7 +298,7 @@ def generate_scene(scene):
 
         frame_play.configure(bg=background_color)
 
-        btn_play = tkinter.Button(frame_play, text="Play", width=18, height=3, command=lambda: play_score(btn_play))
+        btn_play = tkinter.Button(frame_play, text="Play", width=18, height=3, command=lambda: play_score())
         btn_play.grid(row=0, column=0)
 
         # Return Buttons -----------------------------------------------------------------------------------------------
@@ -300,7 +309,7 @@ def generate_scene(scene):
                                     command=lambda: generate_scene(True))
         btn_return.grid(row=0, column=0, padx=(15, 5))
 
-        btn_save = tkinter.Button(frame_returns, text="Save", width=17, height=3)
+        btn_save = tkinter.Button(frame_returns, text="Save", width=17, height=3, command=save_file)
         btn_save.grid(row=0, column=1, padx=5)
 
         btn_shutdown = tkinter.Button(frame_returns, text="Quit", width=17, height=3, command=quit)
@@ -386,24 +395,59 @@ def note_button(button):
     text_entry.add_note(note_name, False)
 
 
-def play_score(button):
-    Variables.playing = not Variables.playing
-
+def play_score():
     score_playback = playback.Playback(text_entry.get(1.0, tkinter.END))
+    score_playback.parse()
+    score_playback.play_score()
 
-    if Variables.playing:
-        button.configure(text="Stop")
 
-        # winsound.Beep(440, 100)
-        # winsound.Beep(540, 100)
+def load_file():
+    filename = filedialog.askopenfilename(initialdir=expanduser("~\\Desktop"), title="Select a Score File",
+                                          filetypes=[("Score Files", "*.mn")])
+    file = open(filename, "r")
 
-        score_playback.parse()
-        score_playback.play_score()
+    config = file.readline()
 
-        Variables.playing = False
-        button.configure(text="Play")
+    settings = config.replace("||", "").replace("\n", "").split(";")
+    key_sig = "N"
+    time_sig = "N"
+    tempo = 0
+
+    for i in range(len(settings)):
+        read_setting = settings[i].split(":")
+
+        if read_setting[0] == "key_sig":
+            key_sig = read_setting[1]
+        elif read_setting[0] == "tempo":
+            tempo = int(read_setting[1])
+        elif read_setting[0] == "time_sig":
+            time_sig = read_setting[1]
+
+    if key_sig == "N" or time_sig == "N" or tempo == 0:
+        messagebox.showerror("Invalid File", "Could not load score settings from file")
     else:
-        button.configure(text="Play")
+        Variables.tempo = tempo
+        Variables.key_sig = key_sig
+        Variables.time_sig = time_sig
+
+        Variables.file_setup = True
+        Variables.file_score = file.readline().replace("Â", "")   # for reasons i dont understand it adds this character
+        generate_scene(False)
+
+    file.close()
+
+
+def save_file():
+    file = filedialog.asksaveasfile(initialdir=expanduser("~\\Desktop"), mode='w', defaultextension=".mn",
+                                    filetypes=[("Score Files", "*.mn")])
+
+    if file is None:
+        messagebox.showerror("Invalid File", "Invalid filename specified")
+        return
+
+    config = "||key_sig:" + Variables.key_sig + ";tempo:" + str(Variables.tempo) + ";time_sig:" + Variables.time_sig + "||\n"
+    file.write(config + text_entry.get(1.0, "end-1c"))
+    file.close()
 
 
 # Press the green button in the gutter to run the script.
