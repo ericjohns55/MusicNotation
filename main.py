@@ -260,11 +260,12 @@ def generate_scene(scene):
 
         frame_accidentals.configure(bg=background_color)
 
-        btn_flat = tkinter.Button(frame_accidentals, text="b", width=12, height=3, command=lambda: accidentals(btn_flat))
-        btn_flat.grid(row=0, column=0, padx=5)
+        accidentals_text = ["b", "N", "#"]
 
-        btn_sharp = tkinter.Button(frame_accidentals, text="#", width=12, height=3, command=lambda: accidentals(btn_sharp))
-        btn_sharp.grid(row=0, column=1, padx=5)
+        for i in range(len(accidentals_text)):
+            btn_accidental = tkinter.Button(frame_accidentals, text=accidentals_text[i], width=8, height=3)
+            btn_accidental.config(command=lambda btn_accidental=btn_accidental: accidentals(btn_accidental))
+            btn_accidental.grid(row=0, column=i, padx=5, pady=(0, 0))
 
         # Octave Buttons Frame -----------------------------------------------------------------------------------------
 
@@ -311,7 +312,7 @@ def generate_scene(scene):
         frame_notes.grid(row=0, column=0, padx=(14, 5))
         frame_note_length.grid(row=0, column=1, padx=(5, 14))
         frame_play.grid(row=0, column=0, padx=(18, 5), pady=(0, 0))
-        frame_accidentals.grid(row=0, column=1, padx=(50, 32), pady=(0, 0))
+        frame_accidentals.grid(row=0, column=1, padx=(40, 22), pady=(0, 0))
         frame_octave.grid(row=0, column=2, padx=(19, 0), pady=(0, 0))
         frame_returns.grid(row=0, column=3, padx=(0, 25), pady=(0, 0))
         frame_row1.pack()
@@ -351,8 +352,10 @@ def accidentals(button):
 
         if button.cget("text") == "b":
             Variables.accidental = 0
-        else:
+        elif button.cget("text") == "#":
             Variables.accidental = 2
+        else:
+            Variables.accidental = 3
 
 
 def select_option(button):
@@ -391,10 +394,11 @@ def play_score(button):
     if Variables.playing:
         button.configure(text="Stop")
 
-        winsound.Beep(440, 100)
-        winsound.Beep(540, 100)
+        # winsound.Beep(440, 100)
+        # winsound.Beep(540, 100)
 
         score_playback.parse()
+        score_playback.play_score()
 
         Variables.playing = False
         button.configure(text="Play")

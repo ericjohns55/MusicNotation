@@ -6,7 +6,6 @@ import note_lookup
 import difflib
 import math
 from playback import Playback
-import winsound
 from tkinter import messagebox
 
 
@@ -84,7 +83,7 @@ class ScoreWidget(tkinter.Text):
                     append = LookupNote.get_rest(Variables.note_length)
                 else:
                     append = LookupNote.get_note(current_note, Variables.octave, Variables.note_length,
-                                                 Variables.accidental)
+                                                 Variables.accidental, Variables.key_sig)
 
                 self.insert(tkinter.END, append)
             else:
@@ -110,7 +109,7 @@ class ScoreWidget(tkinter.Text):
                 second_half = self.get(split[0] + "." + str(int(split[1]) + 2), "end-1c")
 
                 new_note = LookupNote.get_note(note.upper(), Variables.octave, LookupNote.get_note_length(rest_char),
-                                               Variables.accidental)
+                                               Variables.accidental, Variables.key_sig)
 
                 self.delete(1.0, tkinter.END)
                 self.insert(tkinter.END, first_half + new_note + second_half)

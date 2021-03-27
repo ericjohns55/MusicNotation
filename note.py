@@ -1,5 +1,6 @@
 from note_lookup import LookupNote
 from variables import Variables
+import winsound
 
 class Note:
     natural_frequencies = {
@@ -24,24 +25,53 @@ class Note:
         self.note_excerpt = note_excerpt
         self.octave = 0
 
-        if len(note_excerpt) == 1:
-            self.note_symbol = note_excerpt
-            self.accidental = 1
-        elif len(note_excerpt) == 2:
-            self.note_symbol = note_excerpt[-1]
+        self.duration = 500
+        self.frequency = 440
 
+        self.note_symbol = note_excerpt if len(note_excerpt) == 1 else note_excerpt[-1]
+        self.note_name = self.get_note_name(self.note_symbol)
+        self.length = LookupNote.get_note_length(self.note_symbol)
+
+        if self.octave < 0:
+            self.note_name = "R"
+
+        if len(note_excerpt) == 1:
+            self.accidental = 1
+
+            if self.note_name in LookupNote.key_sig[Variables.key_sig]:
+                self.accidental = LookupNote.key_sig[Variables.key_sig][self.note_name]
+        elif len(note_excerpt) == 2:
             accidental_symbol = note_excerpt[0]
 
             if 208 <= ord(accidental_symbol) <= 222:
                 self.accidental = 2
             elif 224 <= ord(accidental_symbol) <= 238:
                 self.accidental = 0
+            elif 240 <= ord(accidental_symbol) <= 254:
+                self.accidental = 1
 
-        self.note_name = self.get_note_name(self.note_symbol)
-        self.length = LookupNote.get_note_length(self.note_symbol)
+        self.prepare_for_playback()
 
-    def get_test_string(self):
-        return self.note_name + " " + str(self.octave) + " " + str(self.length) + " " + str(self.accidental)
+    def prepare_for_playback(self):
+        note_and_octave = self.note_name + str(self.octave)
+
+        if "R" in note_and_octave:
+            frequency = 37
+        else:
+            if self.accidental == 0:
+                frequency = self.flat_frequencies[note_and_octave]
+            elif self.accidental == 1:
+                frequency = self.natural_frequencies[note_and_octave]
+            else:
+                frequency = self.sharp_frequencies[note_and_octave]
+
+        beat_time = 60000 / Variables.tempo
+
+        self.duration = int(beat_time / (self.length / 4))
+        self.frequency = frequency
+
+    def play(self):
+        winsound.Beep(self.frequency, self.duration)
 
     def get_note_name(self, note_excerpt):
         note_length = LookupNote.get_note_length(note_excerpt)

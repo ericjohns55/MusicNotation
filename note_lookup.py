@@ -6,9 +6,25 @@ naturals = ["A", "B", "C", "D", "E", "F", "G", "R"]
 
 rests = ["9", ":", ";", "<"]
 
+
 class LookupNote:
+    key_sig = {
+        "C": {},
+        "Db": {"B": 0, "E": 0, "A": 0, "D": 0, "G": 0},
+        "D": {"F": 2, "C": 2},
+        "Eb": {"B": 0, "E": 0, "A": 0},
+        "E": {"F": 2, "C": 2, "G": 2, "D": 0},
+        "F": {"B": 0},
+        "Gb": {"B": 0, "E": 0, "A": 0, "D": 0, "G": 0, "C": 0},
+        "G": {"F": 2},
+        "Ab": {"B": 0, "E": 0, "A": 0, "D": 0},
+        "A": {"F": 2, "C": 2, "G": 2},
+        "Bb": {"B": 0, "E": 0},
+        "B": {"F": 2, "C": 2, "G": 2, "D": 0, "A": 2}
+    }
+
     @staticmethod
-    def get_note(note, octave, length, accidental):
+    def get_note(note, octave, length, accidental, key_sig):
         octave_adjust = octave * 7
         note_string = ""
 
@@ -41,6 +57,9 @@ class LookupNote:
             elif accidental == 2:
                 sharp = 208 + ((ord(note) - 65) + octave_adjust)
                 note_string = chr(sharp) + note_string
+            elif accidental == 3 and note in LookupNote.key_sig[key_sig]:
+                natural = 240 + ((ord(note) - 65) + octave_adjust)
+                note_string = chr(natural) + note_string
 
         return note_string + "="
 
