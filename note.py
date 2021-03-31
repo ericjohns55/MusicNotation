@@ -78,6 +78,11 @@ class Note:
         # calculate how long in milliseconds a beat is
         beat_time = 60000 / Variables.tempo
 
+        if Variables.time_sig == "Cut":
+            beat_time /= 2
+        elif Variables.time_sig == "6/8":
+            beat_time /= 1.5
+
         # calculate note duration based off of beat length
         self.duration = int(beat_time / (self.length / 4))
         self.frequency = frequency
