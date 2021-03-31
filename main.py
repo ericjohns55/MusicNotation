@@ -3,8 +3,6 @@
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 
-from pydub import AudioSegment
-from pydub.playback import play
 from PIL import Image, ImageTk
 from tkinter import Widget
 from tkinter import messagebox
@@ -12,7 +10,6 @@ from tkinter import filedialog
 from os.path import expanduser
 import playback
 import tkinter
-import winsound
 import pyglet
 import os
 
@@ -20,6 +17,7 @@ from variables import Variables
 import score_widget
 
 
+# make sure only digits can be inputted into the tempo field
 def validate(char):
     if char.isdigit():
         return True
@@ -27,22 +25,7 @@ def validate(char):
         return False
 
 
-def play_sound():
-    c_note = AudioSegment.from_mp3(os.getcwd() + "\\sound\\C4.mp3")
-    e_note = AudioSegment.from_mp3(os.getcwd() + "\\sound\\E4.mp3")
-    g_note = AudioSegment.from_mp3(os.getcwd() + "\\sound\\G4.mp3")
-    as_note = AudioSegment.from_mp3(os.getcwd() + "\\sound\\As5.mp3")
-    b_note = AudioSegment.from_mp3(os.getcwd() + "\\sound\\B5.mp3")
-    d_note = AudioSegment.from_mp3(os.getcwd() + "\\sound\\D5.mp3")
-    ghigh_note = AudioSegment.from_mp3(os.getcwd() + "\\sound\\G5.mp3")
-
-    mixed_audio1 = c_note.overlay(e_note).overlay(g_note).overlay(as_note)[0.1:1000]
-    mixed_audio2 = g_note.overlay(b_note).overlay(d_note).overlay(ghigh_note)[0.1:1000]
-
-    play(mixed_audio1)
-    play(mixed_audio2)
-
-
+# make sure all settings are selected before creating the score
 def validate_form():
     if not Variables.key_sig == "N" and not Variables.time_sig == "N" and Variables.tempo > 0:
         generate_scene(False)
@@ -174,7 +157,7 @@ def generate_scene(scene):
         string_var = tkinter.StringVar()
         string_var.trace("w", lambda name, index, mode, string_var=string_var: tempo_change())
 
-        def tempo_change():
+        def tempo_change(): # grab tempo in tempo box
             Variables.tempo = int(string_var.get())
             return True
 
@@ -219,7 +202,7 @@ def generate_scene(scene):
         frame_tempo.pack()
         frame_create_button.pack()
         frame_quit.pack()
-    else:
+    else:   # generate score screen
         remove_children()
 
         # Row Frames ---------------------------------------------------------------------------------------------------
@@ -238,7 +221,6 @@ def generate_scene(scene):
 
         text_entry.pack()
 
-
         # Note Length Buttons Frame ------------------------------------------------------------------------------------
 
         frame_note_length.configure(bg=background_color)
@@ -252,7 +234,6 @@ def generate_scene(scene):
 
             if btn_note_length.cget("text") == "1/4":
                 btn_note_length.config(bg=selected_color)
-
 
         # Notes Button Frame -------------------------------------------------------------------------------------------
 
@@ -328,6 +309,7 @@ def generate_scene(scene):
         frame_row2.pack()
 
 
+# remove all widgets from view
 def remove_children():
     widgets = app.winfo_children()
 
@@ -335,6 +317,7 @@ def remove_children():
         item.pack_forget()
 
 
+# update the current input octave
 def update_octave(increment, lbl):
     Variables.octave = int(lbl.cget("text")[-1])
     Variables.octave += (1 if increment else -1)
@@ -343,7 +326,9 @@ def update_octave(increment, lbl):
         lbl.config(text=("Octave: +" + str(Variables.octave)))
 
 
+# accidentals listener
 def accidentals(button):
+    # clear other selected accidentals
     def clear_other():
         children = Widget.nametowidget(app, button.winfo_parent()).winfo_children()
 
@@ -351,6 +336,7 @@ def accidentals(button):
             if not child == button:
                 child.config(bg=button_background)
 
+    # deselect if already selected
     if button.cget("bg") == selected_color:
         button.config(bg=button_background)
         clear_other()
@@ -359,6 +345,7 @@ def accidentals(button):
         button.config(bg=selected_color)
         clear_other()
 
+        # load accidentals
         if button.cget("text") == "b":
             Variables.accidental = 0
         elif button.cget("text") == "#":
@@ -367,6 +354,8 @@ def accidentals(button):
             Variables.accidental = 3
 
 
+# listener for buttons where you can only select one in a row
+# deselects other buttons when you grab one so there is no confusion
 def select_option(button):
     parent_frame = Widget.nametowidget(app, button.winfo_parent())
     children = parent_frame.winfo_children()
@@ -386,6 +375,7 @@ def select_option(button):
         Variables.note_length = int(button.cget("text").replace("1/", ""))
 
 
+# button input for score window
 def note_button(button):
     note_name = button.cget("text")
 
@@ -395,6 +385,7 @@ def note_button(button):
     text_entry.add_note(note_name, False)
 
 
+# playback button listener
 def play_score():
     score_playback = playback.Playback(text_entry.get(1.0, tkinter.END))
     score_playback.parse()
@@ -402,17 +393,20 @@ def play_score():
 
 
 def load_file():
+    # grab file from box
     filename = filedialog.askopenfilename(initialdir=expanduser("~\\Desktop"), title="Select a Score File",
                                           filetypes=[("Score Files", "*.mn")])
     file = open(filename, "r")
 
     config = file.readline()
 
+    # parse settings line
     settings = config.replace("||", "").replace("\n", "").split(";")
     key_sig = "N"
     time_sig = "N"
     tempo = 0
 
+    # parse and load settings
     for i in range(len(settings)):
         read_setting = settings[i].split(":")
 
@@ -423,51 +417,60 @@ def load_file():
         elif read_setting[0] == "time_sig":
             time_sig = read_setting[1]
 
+    # check file validity
     if key_sig == "N" or time_sig == "N" or tempo == 0:
         messagebox.showerror("Invalid File", "Could not load score settings from file")
     else:
+        # load settings if acceptable
         Variables.tempo = tempo
         Variables.key_sig = key_sig
         Variables.time_sig = time_sig
 
         Variables.file_setup = True
         Variables.file_score = file.readline().replace("Â", "")   # for reasons i dont understand it adds this character
-        generate_scene(False)
+        generate_scene(False)   # load score page
 
     file.close()
 
 
 def save_file():
+    # create file save dialog
     file = filedialog.asksaveasfile(initialdir=expanduser("~\\Desktop"), mode='w', defaultextension=".mn",
                                     filetypes=[("Score Files", "*.mn")])
 
+    # if file doesnt exist, give up
     if file is None:
         messagebox.showerror("Invalid File", "Invalid filename specified")
         return
 
+    # save settings and load score to file
     config = "||key_sig:" + Variables.key_sig + ";tempo:" + str(Variables.tempo) + ";time_sig:" + Variables.time_sig + "||\n"
     file.write(config + text_entry.get(1.0, "end-1c"))
     file.close()
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+    # themes
     background_color = "white"
     foreground_color = "black"
     button_background = "SystemButtonFace"
     selected_color = "lightgray"
 
+    # generate window
     app = tkinter.Tk()
     app.title("Music Notation")
     app.geometry("1280x720")
     app.configure(bg=background_color)
     app.resizable(False, False)
 
+    # load music font
     pyglet.font.add_file(os.getcwd() + "\\Musiqwik.ttf")
 
+    # generate score widget
     frame_score = tkinter.Frame(app)
     text_entry = score_widget.ScoreWidget(frame_score, width=1200, height=5)
 
+    # load widgets (default first)
     generate_scene(True)
 
     app.mainloop()

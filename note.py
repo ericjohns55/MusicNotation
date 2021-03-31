@@ -2,7 +2,10 @@ from note_lookup import LookupNote
 from variables import Variables
 import winsound
 
+
 class Note:
+    # frequency of playable notes, will be grabbed for playback
+
     natural_frequencies = {
         "A0": 220, "B0": 247, "C0": 262, "D0": 294, "E0": 330, "F0": 349, "G0": 392,
         "A1": 440, "B1": 494, "C1": 523, "D1": 587, "E1": 659, "F1": 698, "G1": 784,
@@ -21,6 +24,7 @@ class Note:
         "A2": 831
     }
 
+    # snag a segment of the score to represent one note, this will now be parsed
     def __init__(self, note_excerpt):
         self.note_excerpt = note_excerpt
         self.octave = 0
@@ -28,16 +32,20 @@ class Note:
         self.duration = 500
         self.frequency = 440
 
+        # parse note symbol
         self.note_symbol = note_excerpt if len(note_excerpt) == 1 else note_excerpt[-1]
         self.note_name = self.get_note_name(self.note_symbol)
         self.length = LookupNote.get_note_length(self.note_symbol)
 
+        # after note parsing, all rests have a negative octave (not possible in general), make symbol a rest
         if self.octave < 0:
             self.note_name = "R"
 
+        # if length is one, there are no declared accidentals
         if len(note_excerpt) == 1:
             self.accidental = 1
 
+            # check if accidental exists in key signature
             if self.note_name in LookupNote.key_sig[Variables.key_sig]:
                 self.accidental = LookupNote.key_sig[Variables.key_sig][self.note_name]
         elif len(note_excerpt) == 2:
@@ -52,9 +60,11 @@ class Note:
 
         self.prepare_for_playback()
 
+    # prepare the notes for playback, assign frequency and duration for winsound library
     def prepare_for_playback(self):
         note_and_octave = self.note_name + str(self.octave)
 
+        # return low frequency for rests (TODO: CHANGE TO NEGATIVE TO REPRESENT SLEEP FUNCTION)
         if "R" in note_and_octave:
             frequency = 37
         else:
@@ -65,14 +75,21 @@ class Note:
             else:
                 frequency = self.sharp_frequencies[note_and_octave]
 
+        # calculate how long in milliseconds a beat is
         beat_time = 60000 / Variables.tempo
 
+        # calculate note duration based off of beat length
         self.duration = int(beat_time / (self.length / 4))
         self.frequency = frequency
 
+    # play the actual note from the frequency and duration, must prepare_for_playback first
     def play(self):
         winsound.Beep(self.frequency, self.duration)
 
+    # parse the note name from excerpt
+    # grab the note length, then remove the ascii table offset for each note length in octave offset
+    # use octave offset and the ascii table to reverse the conversion formula from add_note (in score_widget)
+    # add a negative ascii table offset for each length from 65 so the notes are left with A-G (65-71)
     def get_note_name(self, note_excerpt):
         note_length = LookupNote.get_note_length(note_excerpt)
 
@@ -94,9 +111,8 @@ class Note:
 
         self.octave = octave_adjust
 
-        #ord(note_excerpt) + 1 - octave_adjust
-
         return chr(note_name)
 
+    # return note excerpt for possible testing purposes
     def get_string(self):
         return self.note_excerpt

@@ -1,13 +1,10 @@
-flats = {"C": "B", "D": "CS", "E": "DS", "F": "E", "G": "FS", "A": "GS", "B": "AS"}
-
-sharps = {"C": "CS", "D": "DS", "E": "F", "F": "FS", "G": "GS", "A": "AS", "B": "C"}
-
 naturals = ["A", "B", "C", "D", "E", "F", "G", "R"]
 
 rests = ["9", ":", ";", "<"]
 
 
 class LookupNote:
+    # key signature lookup table, used when parsing input for playback
     key_sig = {
         "C": {},
         "Db": {"B": 0, "E": 0, "A": 0, "D": 0, "G": 0},
@@ -28,6 +25,7 @@ class LookupNote:
         octave_adjust = octave * 7
         note_string = ""
 
+        # check if a rest, then return symbol from rest lookup table (formula cannot be made for these)
         if note.upper() == "R":
             if length == 8:
                 note_string = rests[0]
@@ -38,6 +36,9 @@ class LookupNote:
             elif length == 1:
                 note_string = rests[3]
         else:
+            # if not a rest, use the ascii table and the octave adjuster to grab the note symbol from the
+            # segment of the table that deals with that note length
+
             if length == 8:
                 ascii_code = ord(note) - 1 + octave_adjust
                 note_string += chr(ascii_code)
@@ -51,6 +52,8 @@ class LookupNote:
                 ascii_code = 48 + ord(note) - 1 + octave_adjust
                 note_string += chr(ascii_code)
 
+            # check for accidentals, then append a sign to the beginning depending if it exists
+            # use another ascii table offset for the correct area to calculate what symbol to grab
             if accidental == 0:
                 flat = 224 + ((ord(note) - 65) + octave_adjust)
                 note_string = chr(flat) + note_string
@@ -67,6 +70,7 @@ class LookupNote:
     def convert_to_rest(note):
         char = ord(note)
 
+        # check sections of ascii table that deals with that specific note length symbol
         if 64 <= char <= 79:
             return "9"
         elif 80 <= char <= 94:
@@ -76,7 +80,7 @@ class LookupNote:
         elif 112 <= char <= 126:
             return "<"
         elif char == 32:
-            return "="
+            return "="  # default space if it messes up somehow
 
         return ""
 
@@ -84,6 +88,7 @@ class LookupNote:
     def get_rest(length):
         rest = ""
 
+        # simply grab rest from note length
         if length == 8:
             rest = "9"
         elif length == 4:
@@ -99,6 +104,7 @@ class LookupNote:
     def get_note_length(note):
         length = 0
 
+        # check against rests and specific sections of ascii table to see what length the note sits in
         if note == "9" or 64 <= ord(note) <= 79:
             length = 8
         elif note == ":" or 80 <= ord(note) <= 94:
@@ -112,10 +118,13 @@ class LookupNote:
 
     @staticmethod
     def replaceable(note):
+        # check if the string is a rest or in the notes section of the ascii table to check if it can be replaced with
+        # a rest or another note
         if 64 <= ord(note) <= 126 or note in rests:
             return True
         return False
 
     @staticmethod
     def breakable(rest):
+        # check if it is a large rest/note that can be split in half
         return 58 <= ord(rest) <= 60 or 80 <= ord(rest) <= 126

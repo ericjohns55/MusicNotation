@@ -1,3 +1,4 @@
+# key signature symbols
 key_sig_lookup = {
     "C": "=",
     "Db": "«",
@@ -13,6 +14,7 @@ key_sig_lookup = {
     "B": "¥"
 }
 
+# time signature symbols
 time_sig_lookup = {
     "4/4": "4",
     "3/4": "3",
