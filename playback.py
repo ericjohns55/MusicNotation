@@ -61,3 +61,4 @@ class Playback:
             frequency = Note.sharp_frequencies[note_name]
 
         winsound.Beep(frequency, 150)
+

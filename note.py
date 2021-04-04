@@ -1,6 +1,7 @@
 from note_lookup import LookupNote
 from variables import Variables
 import winsound
+import time
 
 
 class Note:
@@ -89,7 +90,10 @@ class Note:
 
     # play the actual note from the frequency and duration, must prepare_for_playback first
     def play(self):
-        winsound.Beep(self.frequency, self.duration)
+        if self.frequency != 37:
+            winsound.Beep(self.frequency, self.duration)
+        else:
+            time.sleep(self.duration / 1000)
 
     # parse the note name from excerpt
     # grab the note length, then remove the ascii table offset for each note length in octave offset

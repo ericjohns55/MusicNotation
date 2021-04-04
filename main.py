@@ -11,6 +11,7 @@ from os.path import expanduser
 import playback
 import tkinter
 import pyglet
+import threading
 import os
 
 from variables import Variables
@@ -85,6 +86,7 @@ def generate_scene(scene):
         remove_children()
         text_entry.delete(1.0, tkinter.END)
         Variables.tempo = 0
+        Variables.current_measure_length = 0.0
         Variables.time_sig = "N"
         Variables.key_sig = "N"
 
@@ -387,9 +389,11 @@ def note_button(button):
 
 # playback button listener
 def play_score():
+    Variables.playing = True
     score_playback = playback.Playback(text_entry.get(1.0, tkinter.END))
     score_playback.parse()
     score_playback.play_score()
+
 
 
 def load_file():

@@ -142,6 +142,10 @@ class ScoreWidget(tkinter.Text):
                 new_note = LookupNote.get_note(note.upper(), Variables.octave, LookupNote.get_note_length(character),
                                                Variables.accidental, Variables.key_sig)
 
+                # if there is an accidental symbol, remove it
+                if 208 <= ord(first_half[-1]) <= 254:
+                    first_half = first_half[0:len(first_half) - 1]
+
                 # delete the old text, insert the new generated text with the new symbol in the insertion index
                 self.delete(1.0, tkinter.END)
                 self.insert(tkinter.END, first_half + new_note + second_half)
