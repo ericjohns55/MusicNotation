@@ -11,7 +11,6 @@ from os.path import expanduser
 import playback
 import tkinter
 import pyglet
-import threading
 import os
 
 from variables import Variables
@@ -409,6 +408,7 @@ def load_file():
     key_sig = "N"
     time_sig = "N"
     tempo = 0
+    current_length = -1.0
 
     # parse and load settings
     for i in range(len(settings)):
@@ -420,15 +420,18 @@ def load_file():
             tempo = int(read_setting[1])
         elif read_setting[0] == "time_sig":
             time_sig = read_setting[1]
+        elif read_setting[0] == "current_length":
+            current_length = float(read_setting[1])
 
     # check file validity
-    if key_sig == "N" or time_sig == "N" or tempo == 0:
+    if key_sig == "N" or time_sig == "N" or tempo == 0 or current_length == -1.0:
         messagebox.showerror("Invalid File", "Could not load score settings from file")
     else:
         # load settings if acceptable
         Variables.tempo = tempo
         Variables.key_sig = key_sig
         Variables.time_sig = time_sig
+        Variables.current_measure_length = current_length
 
         Variables.file_setup = True
         Variables.file_score = file.readline().replace("Â", "")   # for reasons i dont understand it adds this character
@@ -448,7 +451,8 @@ def save_file():
         return
 
     # save settings and load score to file
-    config = "||key_sig:" + Variables.key_sig + ";tempo:" + str(Variables.tempo) + ";time_sig:" + Variables.time_sig + "||\n"
+    config = "||key_sig:" + Variables.key_sig + ";tempo:" + str(Variables.tempo) + ";time_sig:" + Variables.time_sig \
+             + ";current_length: " + str(Variables.current_measure_length) + "||\n"
     file.write(config + text_entry.get(1.0, "end-1c"))
     file.close()
 
