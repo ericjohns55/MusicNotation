@@ -1,12 +1,12 @@
 # key signature symbols
 key_sig_lookup = {
     "C": "=",
-    "Db": "«",
+    "Db": "¬",
     "D": "¢",
     "Eb": "ª",
     "E": "¤",
     "F": "¨",
-    "Gb": "¬",
+    "Gb": "€",
     "G": "¡",
     "Ab": "«",
     "A": "£",
